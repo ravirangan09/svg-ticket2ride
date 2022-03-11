@@ -5,6 +5,7 @@ import CloseDeckSection from './objects/CloseDeckSection';
 import OpenDeckSection from './objects/OpenDeckSection';
 import * as SVGWrapper from './objects/SVGWrapper';
 import { io } from 'socket.io-client';
+import { initToast } from './helpers/game_helper';
 
 const GAME_CONFIG = {
   width: 1920,
@@ -23,8 +24,14 @@ class Game {
     const defsObject = new SVGWrapper.SVGDefs().attachTo(this.rootSVG)
     this.rootSVG.data('defs', defsObject)
     this.boardRendered = false;
+    this.gameConfig = gameConfig
     this.context = {}
     this.initSocket()
+    initToast(this)
+  }
+
+  do(actionName, actionData=null) {
+    this.socket.emit("do", actionName, actionData)
   }
 
   render(context) {

@@ -1,5 +1,5 @@
 import TrainCard from "./TrainCard"
-import * as SVGWrapper from "./SVGWrapper";
+import { renderHighlightRect, toast } from "../helpers/game_helper";
 
 const TOP = 160
 const LEFT = (150+1594+20)
@@ -65,12 +65,7 @@ export default class OpenDeckSection {
     const game = this.game
     const { rootSVG, socket, context } = game;
     let inProgress = false;
-    let highlightRect = new SVGWrapper.SVGRect(TrainCard.width, TrainCard.height)
-                            .stroke("#00FF00", 6)
-                            .fill("none")
-                            .attachTo(rootSVG)
-                            .hide()
-                            .attr("pointer-events", "none") //IMPORTANT - as no mouse action should work
+    let highlightRect = renderHighlightRect(TrainCard.width, TrainCard.height, rootSVG)
 
     const canDoAction = () => {
       // if(scene.isGameOver()) return false;
@@ -91,7 +86,6 @@ export default class OpenDeckSection {
 
     const cardMouseOut = (e)=>{
       const card = e.detail
-      console.log("mouse out")
       if(card && card.location == this.location) {
         highlightRect.hide()
       }
@@ -112,19 +106,20 @@ export default class OpenDeckSection {
 
     const sendAction = (card) => {
       if(card.color == 'rainbow' && context.actionCount == 1) {
-        // toast(scene, 'Nice try !')
+        toast(game, 'Nice try !')
         return false;
       }
       inProgress = true;
       const cardPos = this.deck.indexOf(card)
-      scene.do("move-open-card-to-player", cardPos)
+      game.do("move-open-card-to-player", cardPos)
     }
 
-    const gameObjectDown = async (pointer, gameObject)=>{
+    const cardClick = async (e)=>{
       if(inProgress) return false;
-      const card = gameObject.getData('card')
+      toast(game, "This is a long messsage xsxsdd ")
+      const card = e.detail
       if(canDoAction() && card && card.location == this.location) {
-        graphics.clear()
+        highlightRect.hide()
         sendAction(card)
       }
     }
@@ -132,19 +127,9 @@ export default class OpenDeckSection {
     // document.on("card-mouseover", gameObjectOut);
     document.addEventListener("card-mouseover", cardMouseOver)
     document.addEventListener("card-mouseout", cardMouseOut)
-    // input.on("gameobjectdown", gameObjectDown);
+    document.addEventListener("card-click", cardClick)
     // socket.on("move-open-card-to-player", doMoveAction);
 
-    const shutdown = ()=>{
-      this.cleanup()
-      events.off("shutdown", shutdown)
-      input.off("gameobjectover", gameObjectOver)
-      input.off("gameobjectout", gameObjectOut)
-      input.off("gameobjectdown", gameObjectDown)
-      socket.off("move-open-card-to-player", doMoveAction);
-    }
-
-    // events.on("shutdown", shutdown);
   }
 
 }

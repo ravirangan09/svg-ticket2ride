@@ -48,6 +48,10 @@ class SVGElement {
     return this.attr("y", value)
   }
 
+  bbox() {
+    return this._node.getBBox();
+  }
+
   add(child) {
     this._node.appendChild(child._node)
     return this;
@@ -175,8 +179,12 @@ export class SVGText extends SVGElement {
   constructor(label) {
     super()
     this._node = document.createElementNS(xmlns, "text")
-    const labelNode = document.createTextNode(label)
-    this._node.appendChild(labelNode)  
+    this.text(label)
+  }
+
+  text(label) {
+    this._node.textContent = label
+    return this;
   }
 
   size(width, height) {
