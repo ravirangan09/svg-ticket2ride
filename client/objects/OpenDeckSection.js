@@ -1,10 +1,9 @@
 import TrainCard from "./TrainCard"
+import * as SVGWrapper from "./SVGWrapper";
 
 const TOP = 160
 const LEFT = (150+1594+20)
 
-const SECTTON_HEIGHT = 600
-const SECTION_WIDTH = 170
 const GUTTER = 20
 
 
@@ -14,11 +13,11 @@ export default class OpenDeckSection {
     this.game = game
     this.location = 'opendeck';
     this.deck = []
-    // this.initEvents();
+    this.initEvents();
   }
 
   async setCards() {
-    const cards = ['green', 'yellow', 'red', 'rainbow', 'white'];
+    const cards = this.game.context.openDeck;
     const oldLength = this.deck.length;
     const newLength = cards.length;
 
@@ -36,6 +35,7 @@ export default class OpenDeckSection {
         this.deck[i].destroy()  //diff color destroy
       }
       const card = new TrainCard(this.game, color, true)
+                      .setInteractive()
       if(i < oldLength)
         this.deck[i] = card;  //new card
       else
@@ -62,13 +62,18 @@ export default class OpenDeckSection {
   }
 
   initEvents() {
-    const scene = this.scene
-    const { input, events, socket, context } = scene;
+    const game = this.game
+    const { rootSVG, socket, context } = game;
     let inProgress = false;
-    
-    const graphics = scene.add.graphics()
+    let highlightRect = new SVGWrapper.SVGRect(TrainCard.width, TrainCard.height)
+                            .stroke("#00FF00", 6)
+                            .fill("none")
+                            .attachTo(rootSVG)
+                            .hide()
+                            .attr("pointer-events", "none") //IMPORTANT - as no mouse action should work
+
     const canDoAction = () => {
-      if(scene.isGameOver()) return false;
+      // if(scene.isGameOver()) return false;
       if(!context.myTurn) return false;
       if(context.actionCount == 0) return true;
       if(context.actionCount >= 2) return false;
@@ -77,19 +82,18 @@ export default class OpenDeckSection {
         context.actionName == "move-close-card-to-player";
     }
 
-    const gameObjectOver = (pointer, gameObject)=>{
-      const card = gameObject.getData('card')
+    const cardMouseOver= (e)=>{
+      const card = e.detail
       if(canDoAction() && card && card.location == this.location) {
-        graphics.clear()
-        graphics.lineStyle(8, 0x00FF00)
-        graphics.strokeRect(card.left, card.top, card.width, card.height)
+        highlightRect.move(card.x, card.y).visible().bringToFront();
       }
     }
 
-    const gameObjectOut = (pointer, gameObject)=>{
-      const card = gameObject.getData('card')
+    const cardMouseOut = (e)=>{
+      const card = e.detail
+      console.log("mouse out")
       if(card && card.location == this.location) {
-        graphics.clear()
+        highlightRect.hide()
       }
     }
 
@@ -108,7 +112,7 @@ export default class OpenDeckSection {
 
     const sendAction = (card) => {
       if(card.color == 'rainbow' && context.actionCount == 1) {
-        toast(scene, 'Nice try !')
+        // toast(scene, 'Nice try !')
         return false;
       }
       inProgress = true;
@@ -125,10 +129,11 @@ export default class OpenDeckSection {
       }
     }
 
-    input.on("gameobjectout", gameObjectOut);
-    input.on("gameobjectover", gameObjectOver)
-    input.on("gameobjectdown", gameObjectDown);
-    socket.on("move-open-card-to-player", doMoveAction);
+    // document.on("card-mouseover", gameObjectOut);
+    document.addEventListener("card-mouseover", cardMouseOver)
+    document.addEventListener("card-mouseout", cardMouseOut)
+    // input.on("gameobjectdown", gameObjectDown);
+    // socket.on("move-open-card-to-player", doMoveAction);
 
     const shutdown = ()=>{
       this.cleanup()
@@ -139,7 +144,7 @@ export default class OpenDeckSection {
       socket.off("move-open-card-to-player", doMoveAction);
     }
 
-    events.on("shutdown", shutdown);
+    // events.on("shutdown", shutdown);
   }
 
 }

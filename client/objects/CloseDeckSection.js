@@ -2,9 +2,6 @@ import TrainCard from "./TrainCard"
 const TOP = 20
 const LEFT = (150+1594+20)
 
-const SECTTON_HEIGHT = 120
-const SECTION_WIDTH = 170
-
 export default class CloseDeckSection {
 
   constructor(game) {
@@ -31,8 +28,7 @@ export default class CloseDeckSection {
   }
 
   setCards() {
-    // const cards = this.scene.context.closeDeck;
-    const cards = ['yellow', 'yellow', 'yellow'];
+    const cards = this.game.context.closeDeck;
     const oldLength = this.deck.length;
     const newLength = cards.length;
     const count = Math.max(newLength, oldLength) 

@@ -14,14 +14,20 @@ class SVGElement {
 
   width(value) {
     if(value === undefined) return parseFloat(this._node.getAttribute("width"));
-    this._node.setAttribute("width", value)
-    return this;
+    return this.attr("width", value)
   }
 
   height(value) {
     if(value === undefined) return parseFloat(this._node.getAttribute("height"));
-    this._node.setAttribute("height", value)
-    return this;
+    return this.attr("height", value)
+  }
+
+  hide() {
+    return this.attr("visibility", "hidden")
+  }
+
+  visible() {
+    return this.attr("visibility", "visible")
   }
 
   size(w, h) {
@@ -34,14 +40,12 @@ class SVGElement {
 
   x(value) {
     if(value === undefined) return parseFloat(this._node.getAttribute("x"));
-    this._node.setAttribute("x", value)
-    return this;
+    return this.attr("x", value)
   }
 
   y(value) {
     if(value === undefined) return parseFloat(this._node.getAttribute("y"));
-    this._node.setAttribute("y", value)
-    return this;
+    return this.attr("y", value)
   }
 
   add(child) {
@@ -51,23 +55,33 @@ class SVGElement {
 
   id(value) {
     if(value === undefined) return this._node.getAttribute('id');
-    this._node.setAttribute('id', value)
-    return this;
+    return this.attr('id', value)
   }
 
   fill(value) {
-    this._node.setAttribute("fill", value)
-    return this;
+    return this.attr("fill", value)
   }
 
-  stroke(value) {
-    this._node.setAttribute("stroke", value)
-    return this;
+  stroke(value, strokeWidth=null) {
+    if(strokeWidth) {
+      this.attr("stroke-width", strokeWidth)
+    }
+    return this.attr("stroke", value)
   }
 
   attr(key, value) {
     if(value === undefined) return this._node.getAttribute(key)
     this._node.setAttribute(key, value)
+    return this;
+  }
+
+  addListener(name, listener) {
+    this._node.addEventListener(name, listener)
+    return this;
+  }
+
+  removeListener(name) {
+    this._node.removeEventListsener(name)
     return this;
   }
 
@@ -93,9 +107,11 @@ class SVGElement {
   }
 
   bringToFront() {
-    const parent = this._node.parentNode;
-    this._node.remove()
-    parent.appendChild(this._node)
+    if(this._node.nextSibling) {
+      const parent = this._node.parentNode;
+      parent.appendChild(this._node)
+    }
+    return this;
   }
 
 }
@@ -107,8 +123,7 @@ export class SVGRoot extends SVGElement {
   }
 
   viewBox(left, top, width, height) {
-    this._node.setAttribute('viewBox', `${left} ${top} ${width} ${height}`)
-    return this;
+    return this.attr('viewBox', `${left} ${top} ${width} ${height}`)
   }
 
 }

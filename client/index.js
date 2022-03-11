@@ -4,6 +4,7 @@ import TrainCard from './objects/TrainCard';
 import CloseDeckSection from './objects/CloseDeckSection';
 import OpenDeckSection from './objects/OpenDeckSection';
 import * as SVGWrapper from './objects/SVGWrapper';
+import { io } from 'socket.io-client';
 
 const GAME_CONFIG = {
   width: 1920,
@@ -21,20 +22,65 @@ class Game {
                             .attachTo(gameConfig.parent)
     const defsObject = new SVGWrapper.SVGDefs().attachTo(this.rootSVG)
     this.rootSVG.data('defs', defsObject)
-    this.render()
+    this.boardRendered = false;
+    this.context = {}
+    this.initSocket()
   }
 
-  render() {
+  render(context) {
+    if(!this.boardRendered) 
+      this.renderGameBoard()
+    this.setContext(context)
+  }
+
+  renderGameBoard() {
+    this.boardRendered = true
     this.cardDefs = TrainCard.drawCards(this.rootSVG)
     this.boardSection = new BoardSection(this)
     this.boardSection.render()
     this.closeDeckSection = new CloseDeckSection(this)
-    this.closeDeckSection.setCards();
     this.openDeckSection = new OpenDeckSection(this)
-    this.openDeckSection.setCards();
   }
 
-}
+  setContext(context) {
+    Object.assign(this.context, context)
+    this.renderContext()
+  }
+
+  renderContext() {
+    this.closeDeckSection.setCards();
+    this.openDeckSection.setCards();
+    // this.playerTrainSection.setCards();
+    // this.playerRouteSection.setTickets();
+    // this.routeDeckSection.setTickets();
+    // if(this.context.claimedSegments.length)
+    //   this.boardSection.renderClaimedSegments();
+  }
+
+  doLogin() {
+    this.socket.emit("login", "Player 1", 1, res=> {
+      if(res.status != "ok") {
+        alert(res.reason)
+        window.location.reload();
+      }
+    })
+  }
+
+  initSocket() {
+    const socket = io();
+    socket.on("connect", ()=>{ 
+      this.socket = socket; 
+      setTimeout(()=>this.doLogin(), 500);
+    });
+    socket.on("startgame", (context)=>{
+      this.render(context)
+    })
+    socket.on("resumegame", (context)=>{
+      console.log("resume game")
+      this.render(context)
+    })
+  } //end initSocket
+} //end class Game
 
 new Game(GAME_CONFIG);
 

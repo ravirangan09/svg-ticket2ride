@@ -33,6 +33,7 @@ export default class TrainCard {
     this.color = color == 'dummy' ? 'closed' : color;
     this.location = null;
     this.open = open
+    this.isInteractive = false;
     this.init()
   }
 
@@ -63,6 +64,14 @@ export default class TrainCard {
     this.location = location;
   }
 
+  static get width() {
+    return CARD_WIDTH;
+  }
+
+  static get height() {
+    return CARD_HEIGHT
+  }  
+
   get width() {
     return CARD_WIDTH;
   }
@@ -72,7 +81,7 @@ export default class TrainCard {
   }
 
   setPosition(x, y, open) {
-    this.show(open, true)
+    this.show(open)
     this.image.move(x,y)
   }
 
@@ -86,10 +95,17 @@ export default class TrainCard {
   
   hide() {
     this.image.hide();
+    return this;
   }
  
+  visible() {
+    this.image.visible();
+    return this;
+  }
+
   destroy() {
     if(this.image) {
+      this.removeInteractive()
       this.image.remove()
       this.image = null;
     }
@@ -99,15 +115,36 @@ export default class TrainCard {
     return this.image != null;
   }
 
-  show(open, force=false) {
+  show(open) {
     const { rootSVG } = this.game
-    if(force || (open && !this.open) || (!open && this.open)) {
+    if((open && !this.open) || (!open && this.open)) {
+      const hasInteraction = this.isInteractive;  //as destroy kills it
       this.destroy()
       this.image = new SVGWrapper.SVGUse(open ? this.openCard : this.closeCard)
                                   .attachTo(rootSVG)
+      if(hasInteraction) this.setInteractive()
     }
     this.image.bringToFront()
     this.open = open
+  }
+
+  setInteractive() {
+    if(this.isInteractive) return this; //nothing to do
+    this.isInteractive = true;
+    const clickEvent = new CustomEvent('card-click', { detail: this })
+    this.image.addListener("click", ()=>document.dispatchEvent(clickEvent))
+    const mouseOverEvent = new CustomEvent('card-mouseover', { detail: this })
+    this.image.addListener("mouseover", ()=>document.dispatchEvent(mouseOverEvent))
+    const mouseOutEvent = new CustomEvent('card-mouseout', { detail: this })
+    this.image.addListener("mouseout", ()=>document.dispatchEvent(mouseOutEvent))
+    return this;
+  }
+  
+  removeInteractive() {
+    this.image.removeListener("click")
+    this.image.removeListener("mouseenter")
+    this.image.removeListener("mouseout")
+    this.isInteractive = false
   }
 
   async moveTo(x, y, open) {
