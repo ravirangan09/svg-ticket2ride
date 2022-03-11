@@ -1,0 +1,13 @@
+@import "./normalize.css";
+@import "@fontsource/marko-one";
+
+body {
+  background-color: black;
+  font-family: 'Marko One';
+}
+
+#game {
+  width: 100vw;
+  height: 100vh;
+}
+
