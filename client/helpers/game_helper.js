@@ -42,7 +42,7 @@ export const initToast = (game) => {
                         .attachTo(game.rootSVG)
                         .hide()
   const bbox = text.bbox()
-  text.y(y+(BOX_HEIGHT-bbox.height)/2)
+  text.incY((BOX_HEIGHT-bbox.height)/2)
   text.x(x+(BOX_WIDTH-bbox.width)/2)
   game.toastText = text
   return true

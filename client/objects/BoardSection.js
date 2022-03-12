@@ -24,6 +24,39 @@ class BoardSection {
     this.routes = clone(routes)
   }
 
+  getRoute(routeIndex) {
+    return this.routes[routeIndex]
+  }
+
+  async renderCoinWithAnimation(coinColor, routeIndex, index) {
+    const coin = this.renderCoin(coinColor, routeIndex, index)
+    const { rotation, centerX, centerY } = coin.data()
+    await coin.animateScale(3, 1000, centerX, centerY, rotation)
+  }
+
+  renderCoin(coinColor, routeIndex, index) {
+    const COIN_DIM = 16
+    const { rootSVG } = this.game
+    const segment = this.routes[routeIndex][index];
+    segment.coinColor = coinColor
+    const { x1, y1, x2, y2} = segment;
+    const x = LEFT + (x1+x2)/2
+    const y = TOP + (y1+y2)/2
+
+    return new SVGWrapper.SVGRect(COIN_DIM, COIN_DIM)
+          .move(x-COIN_DIM/2, y-COIN_DIM/2)
+          .fill(coinColor)
+          .stroke("black")
+          .attachTo(rootSVG)
+          .rotate(rad2deg(segment.theta), x, y)
+          .data({
+            rotation: rad2deg(segment.theta),
+            centerX: x,
+            centerY: y
+          })
+
+  }
+  
   render() {
     this.renderBackground()
     this.renderLocations()
@@ -57,6 +90,9 @@ class BoardSection {
                       .move(x, y)
                       .rotate(rad2deg(theta), x, y+height/2)
 
+    const clickEvent = new CustomEvent('segment-click', { detail: rect })
+    rect.addListener("click", ()=>document.dispatchEvent(clickEvent))
+                  
     rect.data({ routeIndex, index, color })
     this.routes[routeIndex][index].theta = theta
     this.routes[routeIndex][index].coinColor = null

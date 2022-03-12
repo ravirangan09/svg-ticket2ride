@@ -1,4 +1,5 @@
 import { asyncSleep } from "../helpers/game_helper";
+import { isTypeObject } from "../helpers/type_helper";
 
 const xmlns = "http://www.w3.org/2000/svg";
 
@@ -11,8 +12,14 @@ class SVGElement {
   }
 
   data(key, value) {
+    if(isTypeObject(key) && value === undefined) {
+      Object.assign(this._data, key)
+      return this;
+    }
+    if(key === undefined) return this._data;
     if(value === undefined) return this._data[key];
     this._data[key] = value;
+    return this;
   }
 
   width(value) {
@@ -59,6 +66,14 @@ class SVGElement {
   y(value) {
     if(value === undefined) return parseFloat(this._node.getAttribute("y"));
     return this.attr("y", value)
+  }
+
+  incX(value) {
+    return this.attr("x", this.x()+value)
+  }
+
+  incY(value) {
+    return this.attr("y", this.y()+value)
   }
 
   bbox() {
@@ -147,6 +162,34 @@ class SVGElement {
     return true
   }
 
+  async animateScale(factor, duration, centerX, centerY, rotation=0) {
+    const styleSheet = document.styleSheets[0]
+    const keyFrameStyle = `@keyframes scaleupdown {
+      from {
+        transform: scale(1) rotate(${rotation}deg);
+      }
+      
+      50% {
+        transform: scale(${factor}) rotate(${rotation}deg);
+      }
+    
+      to {
+        transform: scale(1) rotate(${rotation}deg);
+      }
+    }`
+    const keyFrameIndex = styleSheet.insertRule(keyFrameStyle, styleSheet.cssRules.length)
+    const classStyle = `.scale-up-down {
+      animation-name: scaleupdown;
+      animation-duration: ${duration}ms;
+      transform-origin: ${centerX}px ${centerY}px; 
+    }`
+    const classStyleIndex = styleSheet.insertRule(classStyle, styleSheet.cssRules.length)
+    this.addClass("scale-up-down")
+    await asyncSleep(duration)
+    this.removeClass("scale-up-down")
+    styleSheet.deleteRule(classStyleIndex)
+    styleSheet.deleteRule(keyFrameIndex)
+  }
 }
 
 export class SVGRoot extends SVGElement {
@@ -235,7 +278,7 @@ export class SVGRect extends SVGElement {
   cornerRadius(r) {
     return this.attr('rx', r)
   }
-}
+ }
 
 export class SVGUse extends SVGElement {
   constructor(defElement) {

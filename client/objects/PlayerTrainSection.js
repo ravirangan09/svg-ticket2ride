@@ -16,7 +16,7 @@ export default class PlayerTrainSection {
     this.location = 'playertrain';
     this.deck = []
     // this.init()
-    // this.initEvents()
+    this.initEvents()
   }
 
   init() {
@@ -134,39 +134,34 @@ export default class PlayerTrainSection {
   }
 
   initEvents() {
-    const scene = this.scene;
-    const { socket, input, events, context } = scene;
-    const boardSection = scene.boardSection;
-    const graphics = scene.add.graphics()
+    const game = this.game;
+    const { socket, context, rootSVG } = game;
+    const boardSection = game.boardSection;
 
     const isFullyVisible = (card)=>{
-      const x = this.container.x + card.left
-      const y = this.container.y + card.top
-      const rect = new Phaser.Geom.Rectangle(x+0.01, y+0.01, card.width-0.02, card.height-0.02)
-      return Phaser.Geom.Rectangle.ContainsRect(this.maskRect, rect)
+      // const x = this.container.x + card.left
+      // const y = this.container.y + card.top
+      // const rect = new Phaser.Geom.Rectangle(x+0.01, y+0.01, card.width-0.02, card.height-0.02)
+      // return Phaser.Geom.Rectangle.ContainsRect(this.maskRect, rect)
+      return true
     }
 
-    const gameObjectOver = (pointer, gameObject)=>{
-      const card = gameObject.getData('card')
+    const cardMouseOver = (e)=>{
+      const card = e.detail
       if(canDoAction() && card && card.location == this.location && isFullyVisible(card)) {
-        graphics.clear()
-        graphics.lineStyle(4, 0x00FF00)
-        const x = this.container.x + card.left
-        const y = this.container.y + card.top
-        graphics.strokeRect(x, y, card.width, card.height)
-        scene.children.bringToTop(graphics)
+        card.image.addClass("highlight-box")
       }
     }
 
-    const gameObjectOut = (pointer, gameObject)=>{
-      const card = gameObject.getData('card')
+    const cardMouseOut = (e)=>{
+      const card = e.detail
       if(card && card.location == this.location) {
-        graphics.clear()
+        card.image.removeClass("highlight-box")
       }
     }
 
     const canDoAction = () => {
-      if(scene.isGameOver()) return false;
+      if(game.isGameOver()) return false;
       if(!context.myTurn) return false;
       if(context.actionCount == 0) return true;
       return context.actionName == "claim-route";
@@ -186,49 +181,42 @@ export default class PlayerTrainSection {
     }
   
     const performCardAction = (card) => {
-      const gameObject = card.image
-      this.container.bringToTop(gameObject);
-      gameObject.y -= 10
+      const cardImage = card.image
+      cardImage.bringToFront()
+      cardImage.incY(-10)
       context.actionName = 'claim-route'
       context.actionCount++;
-      input.setDefaultCursor("crosshair")
+      rootSVG.attr("cursor", "crosshair")
       context.selectedCard = card
     }
 
     const undoCardAction = () => {
       const card = context.selectedCard;
-      card.image.y += 10
+      card.image.incY(10)
       context.actionCount--;
       context.actionName = context.actionCount > 0 ? "claim-route" : "start";
       context.selectedCard = null;
-      input.setDefaultCursor("default")
+      rootSVG.attr("cursor", "default")
       this.render();
     }
 
     let inProgress = false;
-
-    const detachFromContainer = (card) => {
-      const selectedImage = card.image;
-      this.container.remove(selectedImage)
-      selectedImage.setPosition(this.container.x+selectedImage.x, this.container.y+selectedImage.y)
-    }
 
     const claimRoute = async (newContext) => {
       const { routeIndex, index } = newContext.actionData;
 
       const coinColor = context.players[context.currentPlayerIndex].color;
       boardSection.renderCoinWithAnimation(coinColor, routeIndex, index)
-      if(context.myTurn) {
-        detachFromContainer(context.selectedCard)
-        await scene.closeDeckSection.moveCard(context.selectedCard)
-        context.selectedCard = null;
-        input.setDefaultCursor("default")
-      } 
-      else {
-        await scene.playersSection.moveCardToClose(context.currentPlayerIndex)
-      }
-      scene.setContext(newContext)
-      scene.playersSection.updateCurrentPlayerCoins();
+      // if(context.myTurn) {
+      //   await scene.closeDeckSection.moveCard(context.selectedCard)
+      //   context.selectedCard = null;
+      //   input.setDefaultCursor("default")
+      // } 
+      // else {
+      //   await scene.playersSection.moveCardToClose(context.currentPlayerIndex)
+      // }
+      game.setContext(newContext)
+      // scene.playersSection.updateCurrentPlayerCoins();
       inProgress = false;
     }
 
@@ -238,21 +226,21 @@ export default class PlayerTrainSection {
       const segment = route[index]
       const cardColor = context.selectedCard.color
       if(segment.coinColor) {
-        toast(scene, "Coin already placed!")
+        toast(game, "Coin already placed!")
         return false
       }
       if(context.selectedRouteIndex < 0) { //first pin
         //check if pins are avail
         if(cardColor != 'rainbow' && routeColor != 'gray' && routeColor != cardColor) {
-          toast(scene, `Color mismatch ${cardColor} vs ${routeColor}`)
+          toast(game, `Color mismatch ${cardColor} vs ${routeColor}`)
           return false;
         }
         if(!hasCardsToClaim(route)) {
-          toast(scene, "Insufficient matching cards to claim route!")
+          toast(game, "Insufficient matching cards to claim route!")
           return false
         }
         if(route.length > context.me.coins) {
-          toast(scene, "Not enough coins to claim route!")
+          toast(game, "Not enough coins to claim route!")
           return false
         }
         if(routeColor == 'gray') {  //any card will fix
@@ -262,7 +250,7 @@ export default class PlayerTrainSection {
       }
       
       if(context.selectedRouteIndex != routeIndex) {
-        toast(scene, "Cannot claim multiple routes in one turn!")
+        toast(game, "Cannot claim multiple routes in one turn!")
         return false;
       }
       if(cardColor == 'rainbow') {
@@ -270,13 +258,13 @@ export default class PlayerTrainSection {
       } 
       if(routeColor != 'gray') {
         if(routeColor != cardColor) {
-          toast(this.scene, `Color mismatch ${cardColor} vs ${routeColor}`)
+          toast(game, `Color mismatch ${cardColor} vs ${routeColor}`)
           return false
         }
         return true
       }
       if(context.grayRouteColor && cardColor != context.grayRouteColor) {
-        toast(this.scene, `Cannot mix colors in gray route`)
+        toast(game, `Cannot mix colors in gray route`)
         return false
       }
       return true
@@ -286,17 +274,17 @@ export default class PlayerTrainSection {
       inProgress = true;
       const route = boardSection.getRoute(routeIndex);
       const routeColor = route[0].color; 
-      scene.do("claim-route", { routeLength: route.length, routeIndex, index, selectedCardColor, routeColor })
+      game.do("claim-route", { routeLength: route.length, routeIndex, index, selectedCardColor, routeColor })
     }
 
-    const gameObjectDown = async (pointer, gameObject)=>{
+    const cardClick = async (e)=>{
       if(inProgress) return false;
-      const card = gameObject.getData('card')
+      const card = e.detail
       if(canDoAction() && card && card.location == this.location && isFullyVisible(card)) {
-        graphics.clear();
+        card.image.removeClass("highlight-box")
         if((context.actionCount % 2) == 0) {
           inProgress = true;
-          performCardAction(card, pointer)
+          performCardAction(card)
           inProgress = false
           return true
         }
@@ -304,25 +292,35 @@ export default class PlayerTrainSection {
           undoCardAction();
         }
       }
-      const [routeIndex=-1, index] = gameObject.getData(['routeIndex', 'index'])
-      if(canDoAction() && routeIndex >= 0 && context.selectedCard && 
-          canClaimRoute(routeIndex, index)) {
-        sendAction(routeIndex, index, context.selectedCard.color)
-      }
-      if(gameObject == this.rightArrow) {
-        this.scrollContainer(-SCROLL_OFFSET);
-      }
-      if(gameObject == this.leftArrow) {
-        this.scrollContainer(SCROLL_OFFSET);
-      }
+      // const [routeIndex=-1, index] = gameObject.getData(['routeIndex', 'index'])
+      // if(canDoAction() && routeIndex >= 0 && context.selectedCard && 
+      //     canClaimRoute(routeIndex, index)) {
+      //   sendAction(routeIndex, index, context.selectedCard.color)
+      // }
+      // if(gameObject == this.rightArrow) {
+      //   this.scrollContainer(-SCROLL_OFFSET);
+      // }
+      // if(gameObject == this.leftArrow) {
+      //   this.scrollContainer(SCROLL_OFFSET);
+      // }
     }
  
+    const segmentClick = async (e)=>{
+      console.log("sc")
+      if(inProgress) return false;
+      const segment = e.detail
+      const {routeIndex=-1, index} = segment.data()
+      if(canDoAction() && routeIndex >= 0 && context.selectedCard && 
+          canClaimRoute(routeIndex, index)) {
+         sendAction(routeIndex, index, context.selectedCard.color)
+      }
+    }
 
-    input.on("gameobjectout", gameObjectOut);
-    input.on("gameobjectover", gameObjectOver)
-    input.on("gameobjectdown", gameObjectDown);
+    document.addEventListener("card-mouseover", cardMouseOver);
+    document.addEventListener("card-mouseout", cardMouseOut);
+    document.addEventListener("card-click", cardClick);    
+    document.addEventListener("segment-click", segmentClick);    
     socket.on("claim-route", claimRoute);
-
   }
 
 }
