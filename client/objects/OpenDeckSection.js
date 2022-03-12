@@ -1,5 +1,5 @@
 import TrainCard from "./TrainCard"
-import { renderHighlightRect, toast } from "../helpers/game_helper";
+import { toast } from "../helpers/game_helper";
 
 const TOP = 160
 const LEFT = (150+1594+20)
@@ -63,12 +63,11 @@ export default class OpenDeckSection {
 
   initEvents() {
     const game = this.game
-    const { rootSVG, socket, context } = game;
+    const { socket, context } = game;
     let inProgress = false;
-    let highlightRect = renderHighlightRect(TrainCard.width, TrainCard.height, rootSVG)
 
     const canDoAction = () => {
-      // if(scene.isGameOver()) return false;
+      if(game.isGameOver()) return false;
       if(!context.myTurn) return false;
       if(context.actionCount == 0) return true;
       if(context.actionCount >= 2) return false;
@@ -80,14 +79,14 @@ export default class OpenDeckSection {
     const cardMouseOver= (e)=>{
       const card = e.detail
       if(canDoAction() && card && card.location == this.location) {
-        highlightRect.move(card.x, card.y).visible().bringToFront();
+        card.image.addClass("highlight-box")
       }
     }
 
     const cardMouseOut = (e)=>{
       const card = e.detail
       if(card && card.location == this.location) {
-        highlightRect.hide()
+        card.image.removeClass("highlight-box")
       }
     }
 
@@ -95,12 +94,12 @@ export default class OpenDeckSection {
       const cardPos = newContext.actionData
       const card = this.deck[cardPos]
       if(context.myTurn) {
-        await scene.playerTrainSection.moveCard(card)
+        await game.playerTrainSection.moveCard(card)
       }
-      else {
-        await scene.playersSection.moveCard(card, context.currentPlayerIndex)
-      }
-      scene.setContext(newContext)
+      // else {
+      //   await game.playersSection.moveCard(card, context.currentPlayerIndex)
+      // }
+      game.setContext(newContext)
       inProgress = false;
     }
 
@@ -116,20 +115,17 @@ export default class OpenDeckSection {
 
     const cardClick = async (e)=>{
       if(inProgress) return false;
-      toast(game, "This is a long messsage xsxsdd ")
       const card = e.detail
       if(canDoAction() && card && card.location == this.location) {
-        highlightRect.hide()
+        card.image.removeClass("highlight-box")
         sendAction(card)
       }
     }
 
-    // document.on("card-mouseover", gameObjectOut);
     document.addEventListener("card-mouseover", cardMouseOver)
     document.addEventListener("card-mouseout", cardMouseOut)
     document.addEventListener("card-click", cardClick)
-    // socket.on("move-open-card-to-player", doMoveAction);
-
+    socket.on("move-open-card-to-player", doMoveAction);
   }
 
 }

@@ -11,3 +11,6 @@ body {
   height: 100vh;
 }
 
+.highlight-box {
+  outline: 4px solid #0f0;
+}

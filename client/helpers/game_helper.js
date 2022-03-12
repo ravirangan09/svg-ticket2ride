@@ -1,12 +1,8 @@
 import * as SVGWrapper from "../objects/SVGWrapper";
-export const renderHighlightRect = (width, height, parent) => {
-  return new SVGWrapper.SVGRect(width, height)
-  .stroke("#00FF00", 6)
-  .fill("none")
-  .attachTo(parent)
-  .hide()
-  .attr("pointer-events", "none") //IMPORTANT - as no mouse action should work
 
+const TOAST_TIMEOUT = 3000
+export const asyncSleep = async (time) => {
+  return await (new Promise(resolve => setTimeout(resolve, time)));
 }
 
 export const toast = (game, msg) => {
@@ -14,7 +10,7 @@ export const toast = (game, msg) => {
   toastRect.visible().bringToFront()
   toastText.text(msg).visible().bringToFront()
   const bbox = toastText.bbox()
-  toastRect.width(bbox.width+20)
+  toastRect.width(bbox.width+30)
   let x = (gameConfig.width - toastRect.width())/2
   toastRect.x(x)
   x = toastRect.x()+(toastRect.width()-bbox.width)/2
@@ -22,7 +18,7 @@ export const toast = (game, msg) => {
   setTimeout(()=>{
     toastText.hide()
     toastRect.hide()
-  }, 3000)
+  }, TOAST_TIMEOUT)
 }
 
 export const initToast = (game) => {
@@ -42,6 +38,7 @@ export const initToast = (game) => {
                         .move(x,y)
                         .fill("white")
                         .attr("dominant-baseline", "hanging")
+                        .attr("font-size", "24px")
                         .attachTo(game.rootSVG)
                         .hide()
   const bbox = text.bbox()

@@ -8,7 +8,7 @@ export default class CloseDeckSection {
     this.game = game;
     this.location = 'closedeck';
     this.deck = []
-    // this.initEvents();
+    this.initEvents();
   }
 
   popCard() {
@@ -51,6 +51,7 @@ export default class CloseDeckSection {
         this.deck.push(card)
     }
     this.deck.length = newLength;
+    this.deck.at(-1).setInteractive() //set top card as interactive, and not anything else
     this.render()
   }
  
@@ -64,12 +65,11 @@ export default class CloseDeckSection {
   }
 
   initEvents() {
-    const scene = this.scene
-    const graphics = scene.add.graphics()
-    const { context, input, socket, events } = scene
+    const game = this.game
+    const { context, socket } = game
 
     const canDoAction = () => {
-      if(scene.isGameOver()) return false;
+      if(game.isGameOver()) return false;
       if(!context.myTurn) return false;
       if(context.actionCount == 0) return true;
       if(context.actionCount >= 2 ) return false;
@@ -78,19 +78,17 @@ export default class CloseDeckSection {
         context.actionName == "move-close-card-to-player";
     }
 
-    const gameObjectOver = (pointer, gameObject)=>{
-      const card = gameObject.getData('card')
+    const cardMouseOver = (e)=>{
+      const card = e.detail
       if(canDoAction() && card && card.location == this.location) {
-        graphics.clear()
-        graphics.lineStyle(8, 0x00FF00)
-        graphics.strokeRect(card.left, card.top, card.width, card.height)
+        card.image.addClass("highlight-box")
       }
     }
 
-    const gameObjectOut = (pointer, gameObject)=>{
-      const card = gameObject.getData('card')
+    const cardMouseOut = (e)=>{
+      const card = e.detail
       if(card && card.location == this.location) {
-        graphics.clear()
+        card.image.removeClass("highlight-box")
       }
     }
 
@@ -98,48 +96,39 @@ export default class CloseDeckSection {
 
     const doMoveAction = async (newContext) => {
       const topCard = this.popCard()
+      console.log("tc ", topCard.image._node)
       if(context.myTurn) {
         const movedCard = newContext.me.cards.at(-1)
         if(movedCard != topCard.color) {
           throw new Error(`Mismatch in color ${movedCard} ${topCard.color}`)
         }
-        await scene.playerTrainSection.moveCard(topCard)
+        await game.playerTrainSection.moveCard(topCard)
       }
-      else {
-        await scene.playersSection.moveCard(topCard, context.currentPlayerIndex)
-      }
-      scene.setContext(newContext)
+      // else {
+      //   await scene.playersSection.moveCard(topCard, context.currentPlayerIndex)
+      // }
+      game.setContext(newContext)
       inProgress = false;
     }
 
     const sendAction = () => {
       inProgress = true;
-      scene.do("move-close-card-to-player")
+      game.do("move-close-card-to-player")
     }
 
-    const gameObjectDown = async (pointer, gameObject)=>{
+    const cardClick = async (e)=>{
       if(inProgress) return false;
-      const card = gameObject.getData('card')
+      const card = e.detail
       if(canDoAction() && card && card.location == this.location) {
-        graphics.clear()
+        card.image.removeClass("highlight-box")
         sendAction()
       }
     }
 
-    input.on("gameobjectover", gameObjectOver)
-    input.on("gameobjectout", gameObjectOut);
-    input.on("gameobjectdown", gameObjectDown);
+    document.addEventListener("card-mouseover", cardMouseOver)
+    document.addEventListener("card-mouseout", cardMouseOut)
+    document.addEventListener("card-click", cardClick)
     socket.on("move-close-card-to-player", doMoveAction);
 
-    const shutdown = ()=>{
-      this.cleanup()
-      events.off("shutdown", shutdown)
-      input.off("gameobjectover", gameObjectOver)
-      input.off("gameobjectout", gameObjectOut)
-      input.off("gameobjectdown", gameObjectDown);
-      socket.off("move-close-card-to-player", doMoveAction);
-    }
-
-    events.on("shutdown", shutdown);
   }
 }

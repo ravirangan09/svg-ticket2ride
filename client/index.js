@@ -6,6 +6,7 @@ import OpenDeckSection from './objects/OpenDeckSection';
 import * as SVGWrapper from './objects/SVGWrapper';
 import { io } from 'socket.io-client';
 import { initToast } from './helpers/game_helper';
+import PlayerTrainSection from './objects/PlayerTrainSection';
 
 const GAME_CONFIG = {
   width: 1920,
@@ -47,6 +48,7 @@ class Game {
     this.boardSection.render()
     this.closeDeckSection = new CloseDeckSection(this)
     this.openDeckSection = new OpenDeckSection(this)
+    this.playerTrainSection = new PlayerTrainSection(this)
   }
 
   setContext(context) {
@@ -54,10 +56,14 @@ class Game {
     this.renderContext()
   }
 
+  isGameOver() {
+    return this.context.isGameOver && this.context.finalTurnCount == 0;
+  }
+
   renderContext() {
     this.closeDeckSection.setCards();
     this.openDeckSection.setCards();
-    // this.playerTrainSection.setCards();
+    this.playerTrainSection.setCards();
     // this.playerRouteSection.setTickets();
     // this.routeDeckSection.setTickets();
     // if(this.context.claimedSegments.length)

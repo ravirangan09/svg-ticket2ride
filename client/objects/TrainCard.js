@@ -119,9 +119,12 @@ export default class TrainCard {
     const { rootSVG } = this.game
     if((open && !this.open) || (!open && this.open)) {
       const hasInteraction = this.isInteractive;  //as destroy kills it
+      const saveX = this.image.x()
+      const saveY = this.image.y()
       this.destroy()
       this.image = new SVGWrapper.SVGUse(open ? this.openCard : this.closeCard)
                                   .attachTo(rootSVG)
+                                  .move(saveX, saveY)
       if(hasInteraction) this.setInteractive()
     }
     this.image.bringToFront()
@@ -141,32 +144,16 @@ export default class TrainCard {
   }
   
   removeInteractive() {
+    if(!this.isInteractive) return this;  //noting to do
     this.image.removeListener("click")
-    this.image.removeListener("mouseenter")
+    this.image.removeListener("mouseover")
     this.image.removeListener("mouseout")
     this.isInteractive = false
   }
 
   async moveTo(x, y, open) {
     this.show(open);
-    if(this.scene.gamePaused) {
-      //tweens will not work on browser minimize, as requestAnimationFrame is paused
-      return this.image.setPosition(x,y)
-    }
-    this.image.disableInteractive()
-    return new Promise(resolve=>this.scene.tweens.add({
-                              targets: this.image,
-                              duration: TWEEN_DURATION,
-                              x,
-                              y,
-                              onComplete: ()=>{
-                                if(this.image){
-                                  this.image.setInteractive()
-                                }
-                                resolve(true)
-                              }
-                            })
-    );
+    return await this.image.animateTranslate(x, y, TWEEN_DURATION)
   }
 
 }

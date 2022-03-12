@@ -1,3 +1,5 @@
+import { asyncSleep } from "../helpers/game_helper";
+
 const xmlns = "http://www.w3.org/2000/svg";
 
 class SVGElement {
@@ -5,6 +7,7 @@ class SVGElement {
   constructor() {
     this._node = null
     this._data = {}
+    this._listeners = {}
   }
 
   data(key, value) {
@@ -32,6 +35,16 @@ class SVGElement {
 
   size(w, h) {
     return this.width(w).height(h);
+  }
+
+  addClass(name) {
+    this._node.classList.add(name)
+    return this;
+  }
+
+  removeClass(name) {
+    this._node.classList.remove(name)
+    return this;
   }
 
   move(x, y) {
@@ -81,11 +94,12 @@ class SVGElement {
 
   addListener(name, listener) {
     this._node.addEventListener(name, listener)
+    this._listeners[name] = listener
     return this;
   }
 
   removeListener(name) {
-    this._node.removeEventListsener(name)
+    this._node.removeEventListener(name, this._listeners[name])
     return this;
   }
 
@@ -116,6 +130,21 @@ class SVGElement {
       parent.appendChild(this._node)
     }
     return this;
+  }
+
+  async animateTranslate(tx, ty, duration, steps=20) {
+    let x = this.x()
+    let y = this.y()
+    const stepX = (tx - x)/steps
+    const stepY = (ty - y)/steps
+    const delay = duration/steps
+    for(let i=0;i<steps;i++) {
+      await asyncSleep(delay)
+      x += stepX
+      y += stepY
+      this.move(x,y)
+    }
+    return true
   }
 
 }
