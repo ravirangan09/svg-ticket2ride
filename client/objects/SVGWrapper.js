@@ -147,24 +147,38 @@ class SVGElement {
     return this;
   }
 
-  async animateTranslate(tx, ty, duration, steps=20) {
-    let x = this.x()
-    let y = this.y()
-    const stepX = (tx - x)/steps
-    const stepY = (ty - y)/steps
-    const delay = duration/steps
-    for(let i=0;i<steps;i++) {
-      await asyncSleep(delay)
-      x += stepX
-      y += stepY
-      this.move(x,y)
-    }
-    return true
+  async animateMove(tx, ty, duration) {
+    const styleSheet = document.styleSheets[0]
+    const keyFrameName = 'kf-'+Math.random().toString(36).slice(2,7)
+    const keyFrameStyle = `@keyframes ${keyFrameName} {
+      from {
+        x: ${this.x()}px;
+        y: ${this.y()}px;
+      }
+        
+      to {
+        x: ${tx}px;
+        y: ${ty}px;
+      }
+    }`
+    const keyFrameIndex = styleSheet.insertRule(keyFrameStyle, styleSheet.cssRules.length)
+    const clName = 'cl-'+Math.random().toString(36).slice(2,7)
+    const classStyle = `.${clName} {
+      animation-name: ${keyFrameName};
+      animation-duration: ${duration}ms;
+    }`
+    const classStyleIndex = styleSheet.insertRule(classStyle, styleSheet.cssRules.length)
+    this.addClass(clName)
+    await asyncSleep(duration)
+    this.removeClass(clName)
+    styleSheet.deleteRule(classStyleIndex)
+    styleSheet.deleteRule(keyFrameIndex)
   }
 
   async animateScale(factor, duration, centerX, centerY, rotation=0) {
     const styleSheet = document.styleSheets[0]
-    const keyFrameStyle = `@keyframes scaleupdown {
+    const keyFrameName = 'kf-'+Math.random().toString(36).slice(2,7)
+    const keyFrameStyle = `@keyframes ${keyFrameName} {
       from {
         transform: scale(1) rotate(${rotation}deg);
       }
@@ -178,15 +192,17 @@ class SVGElement {
       }
     }`
     const keyFrameIndex = styleSheet.insertRule(keyFrameStyle, styleSheet.cssRules.length)
-    const classStyle = `.scale-up-down {
-      animation-name: scaleupdown;
+    const clName = 'cl-'+Math.random().toString(36).slice(2,7)
+
+    const classStyle = `.${clName} {
+      animation-name: ${keyFrameName};
       animation-duration: ${duration}ms;
       transform-origin: ${centerX}px ${centerY}px; 
     }`
     const classStyleIndex = styleSheet.insertRule(classStyle, styleSheet.cssRules.length)
-    this.addClass("scale-up-down")
+    this.addClass(clName)
     await asyncSleep(duration)
-    this.removeClass("scale-up-down")
+    this.removeClass(clName)
     styleSheet.deleteRule(classStyleIndex)
     styleSheet.deleteRule(keyFrameIndex)
   }

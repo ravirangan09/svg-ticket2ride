@@ -153,7 +153,7 @@ export default class TrainCard {
 
   async moveTo(x, y, open) {
     this.show(open);
-    return await this.image.animateTranslate(x, y, TWEEN_DURATION)
+    return await this.image.animateMove(x, y, TWEEN_DURATION)
   }
 
 }
