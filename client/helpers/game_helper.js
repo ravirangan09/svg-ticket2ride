@@ -1,6 +1,9 @@
 import * as SVGWrapper from "../objects/SVGWrapper";
 
 const TOAST_TIMEOUT = 3000
+
+export const clamp = (value, min, max) => value < min ? min : ( value > max ? max : value);
+
 export const asyncSleep = async (time) => {
   return await (new Promise(resolve => setTimeout(resolve, time)));
 }

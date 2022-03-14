@@ -306,7 +306,6 @@ export default class PlayerTrainSection {
     }
  
     const segmentClick = async (e)=>{
-      console.log("sc")
       if(inProgress) return false;
       const segment = e.detail
       const {routeIndex=-1, index} = segment.data()

@@ -9,6 +9,9 @@ class SVGElement {
     this._node = null
     this._data = {}
     this._listeners = {}
+    this._transform = []
+    this._transformOriginX = null
+    this._transformOriginY = null
   }
 
   data(key, value) {
@@ -130,8 +133,39 @@ class SVGElement {
     return this;
   }
 
+  transform(key, value) {
+    if(key === undefined) return this._transform.join(' ');
+    if(this._transformOriginX !== null) {
+      this._node.style["transform-origin"] = `${this._transformOriginX}px ${this._transformOriginY}px`;
+    }
+    this._transform.push(`${key}(${value})`)
+    this._node.style.transform = this._transform.join(' ');
+    return this;
+  }
+
+  resetTransform() {
+    this._transform.length = 0
+    this._transformOriginX = null;
+    this._transformOriginY = null;
+    this._node.style["transform-origin"] = null;
+    this._node.style.transform = null;
+    return this;
+  }
+
+  translate(x, y) {
+    return this.transform('translate', `${x}px, ${y}px`)
+  }
+
   rotate(angle, x, y) {
-    return this.attr('transform', `rotate(${angle} ${x} ${y})`)
+    this._transformOriginX = x;
+    this._transformOriginY = y;
+    return this.transform('rotate', `${angle}deg`)
+  }
+
+  scale(factor, x, y) {
+    this._transformOriginX = x;
+    this._transformOriginY = y;
+    return this.transform('scale', factor)
   }
 
   remove() {
@@ -175,29 +209,32 @@ class SVGElement {
     styleSheet.deleteRule(keyFrameIndex)
   }
 
-  async animateScale(factor, duration, centerX, centerY, rotation=0) {
+  async animateScale(factor, duration) {
     const styleSheet = document.styleSheets[0]
     const keyFrameName = 'kf-'+Math.random().toString(36).slice(2,7)
+    const currentTransform = this.transform()
+
     const keyFrameStyle = `@keyframes ${keyFrameName} {
       from {
-        transform: scale(1) rotate(${rotation}deg);
+        transform: ${currentTransform} scale(1);
       }
       
       50% {
-        transform: scale(${factor}) rotate(${rotation}deg);
+        transform: ${currentTransform} scale(${factor});
       }
     
       to {
-        transform: scale(1) rotate(${rotation}deg);
+        transform: ${currentTransform} scale(1);
       }
     }`
+
+    console.log(keyFrameStyle)
     const keyFrameIndex = styleSheet.insertRule(keyFrameStyle, styleSheet.cssRules.length)
     const clName = 'cl-'+Math.random().toString(36).slice(2,7)
 
     const classStyle = `.${clName} {
       animation-name: ${keyFrameName};
       animation-duration: ${duration}ms;
-      transform-origin: ${centerX}px ${centerY}px; 
     }`
     const classStyleIndex = styleSheet.insertRule(classStyle, styleSheet.cssRules.length)
     this.addClass(clName)
@@ -293,6 +330,15 @@ export class SVGRect extends SVGElement {
 
   cornerRadius(r) {
     return this.attr('rx', r)
+  }
+ }
+
+ export class SVGRectClipPath extends SVGElement {
+  constructor(width, height, x, y) {
+    super()
+    this._node = document.createElementNS(xmlns, "clipPath")
+    const rect = new SVGRect(width, height).x(x).y(y)
+    this.add(rect)     
   }
  }
 

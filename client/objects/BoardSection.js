@@ -7,6 +7,7 @@ import textLocations from '../data/textlocations.json';
 import routes from "../data/routes.json";
 import mapBackground from "../assets/watercolor-europe-t2r.jpg"
 import * as SVGWrapper from './SVGWrapper';
+import { clamp } from '../helpers/game_helper';
 
 
 const dist = (x1, y1, x2, y2)=>Math.sqrt((x2-x1)**2 + (y2-y1)**2)
@@ -22,6 +23,7 @@ class BoardSection {
   constructor(game) {
     this.game = game
     this.routes = clone(routes)
+    this.initEvents()
   }
 
   getRoute(routeIndex) {
@@ -36,7 +38,6 @@ class BoardSection {
 
   renderCoin(coinColor, routeIndex, index) {
     const COIN_DIM = 16
-    const { rootSVG } = this.game
     const segment = this.routes[routeIndex][index];
     segment.coinColor = coinColor
     const { x1, y1, x2, y2} = segment;
@@ -47,7 +48,7 @@ class BoardSection {
           .move(x-COIN_DIM/2, y-COIN_DIM/2)
           .fill(coinColor)
           .stroke("black")
-          .attachTo(rootSVG)
+          .attachTo(this.boardGroup)
           .rotate(rad2deg(segment.theta), x, y)
           .data({
             rotation: rad2deg(segment.theta),
@@ -58,22 +59,34 @@ class BoardSection {
   }
   
   render() {
+
+    const { rootSVG } = this.game
+    const defsObject = rootSVG.data('defs')
+    new SVGWrapper.SVGRectClipPath(BOARD_WIDTH, BOARD_HEIGHT, LEFT, TOP)
+                            .id("board-clip")
+                            .attachTo(defsObject) 
+                            .attr("clipPathUnits", "userSpaceOnUse")
+
+    const parentGroup = new SVGWrapper.SVGGroup()
+                            .attachTo(rootSVG)
+                            .attr("clip-path", "url(#board-clip)")
+    this.boardGroup =  new SVGWrapper.SVGGroup()
+                            .attachTo(parentGroup)
+              
     this.renderBackground()
     this.renderLocations()
     this.renderRoutes()
   }
 
   renderBackground() {
-    const { rootSVG } = this.game
     new SVGWrapper.SVGImage(mapBackground)
                           .size(BOARD_WIDTH, BOARD_HEIGHT)
-                          .attachTo(rootSVG)
+                          .attachTo(this.boardGroup)
                           .move(LEFT, TOP)
 
   }
 
   renderSegment(lineSegment, routeIndex) {
-    const { rootSVG } = this.game
     const { x1, y1, x2, y2, color, index } = lineSegment;
 
     const width = dist(x1, y1, x2, y2)
@@ -83,7 +96,7 @@ class BoardSection {
     const y = TOP + (x2 > x1 ? y1 : y2) - height/2;
 
     const rect = new SVGWrapper.SVGRect(width, height)
-                      .attachTo(rootSVG)
+                      .attachTo(this.boardGroup)
                       .fill(COLOR_MAP[color])
                       .stroke("black")
                       .cornerRadius(4)
@@ -106,29 +119,89 @@ class BoardSection {
   }
 
   renderPin(place) {
-    const { rootSVG } = this.game
     const pinBounds = textLocations[place].pinBounds
     const x = LEFT + (pinBounds.left + pinBounds.right)/2;
     const y = TOP + (pinBounds.top + pinBounds.bottom)/2;
     //outer circle
-    new SVGWrapper.SVGCircle(pinBounds.width/2).fill("#fff").stroke("#000").move(x,y).attachTo(rootSVG)
-    new SVGWrapper.SVGCircle(pinBounds.width/2-4).fill("#000").move(x,y).attachTo(rootSVG)
+    new SVGWrapper.SVGCircle(pinBounds.width/2)
+          .fill("#fff")
+          .stroke("#000")
+          .move(x,y)
+          .attachTo(this.boardGroup)
+    new SVGWrapper.SVGCircle(pinBounds.width/2-4)
+          .fill("#000")
+          .move(x,y)
+          .attachTo(this.boardGroup)
   }
 
   renderLocations() {
-    const { rootSVG } = this.game
     for(const place in textLocations) {
       const { left, top } = textLocations[place].labelBounds;
       const x = left + LEFT;
       const y = top + TOP;
       new SVGWrapper.SVGText(place)
-                  .attachTo(rootSVG)
+                  .attachTo(this.boardGroup)
                   .attr("dominant-baseline", "hanging")
                   .attr("font-size", "18px")
                   .move(x, y)
 
       this.renderPin(place)
     }
+  }
+
+  initEvents() {
+    let isZoomed = false
+    const SCALE_FACTOR = 1.5
+    let offsetX = 0
+    let offsetY = 0
+
+    const setZoom = () => {
+      if(isZoomed) {
+        isZoomed = false;
+        return this.boardGroup.resetTransform()
+                              .scale(1, LEFT, TOP)
+      }
+      isZoomed = true;
+      offsetX = -(BOARD_WIDTH*SCALE_FACTOR - BOARD_WIDTH)/2;
+      offsetY = -(BOARD_HEIGHT*SCALE_FACTOR - BOARD_HEIGHT)/2;
+      this.boardGroup.resetTransform()
+                            .translate(offsetX, offsetY)
+                            .scale(SCALE_FACTOR, LEFT, TOP)
+    }
+
+    const pan = (panX, panY) => {
+      if(!isZoomed) return false;
+
+      offsetX = clamp(offsetX+panX, -(BOARD_WIDTH*SCALE_FACTOR - BOARD_WIDTH), 0)
+      offsetY = clamp(offsetY+panY, -(BOARD_HEIGHT*SCALE_FACTOR - BOARD_HEIGHT), 0)
+
+      this.boardGroup.resetTransform()
+                            .translate(offsetX, offsetY)
+                            .scale(SCALE_FACTOR, LEFT, TOP)
+    }
+
+    const keyDownHandler = (e)=> {  
+      e.preventDefault()
+      switch(e.key) {
+      case 'z':
+      case 'Z':
+        setZoom();
+        break;
+      case 'ArrowUp':
+        pan(0, 10)
+        break;
+      case 'ArrowDown':
+        pan(0, -10)
+        break;
+      case 'ArrowLeft':
+        pan(10, 0)
+        break;
+      case 'ArrowRight':
+        pan(-10, 0)
+        break;
+      }
+    }
+    document.addEventListener("keydown", keyDownHandler)
   }
 }
 
