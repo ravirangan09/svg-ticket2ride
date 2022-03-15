@@ -7,6 +7,7 @@ import * as SVGWrapper from './objects/SVGWrapper';
 import { io } from 'socket.io-client';
 import { initToast } from './helpers/game_helper';
 import PlayerTrainSection from './objects/PlayerTrainSection';
+import PlayerRouteSection from './objects/PlayerRouteSection';
 
 const GAME_CONFIG = {
   width: 1920,
@@ -49,6 +50,7 @@ class Game {
     this.closeDeckSection = new CloseDeckSection(this)
     this.openDeckSection = new OpenDeckSection(this)
     this.playerTrainSection = new PlayerTrainSection(this)
+    this.playerRouteSection = new PlayerRouteSection(this)
   }
 
   setContext(context) {
@@ -64,7 +66,7 @@ class Game {
     this.closeDeckSection.setCards();
     this.openDeckSection.setCards();
     this.playerTrainSection.setCards();
-    // this.playerRouteSection.setTickets();
+    this.playerRouteSection.setTickets();
     // this.routeDeckSection.setTickets();
     // if(this.context.claimedSegments.length)
     //   this.boardSection.renderClaimedSegments();

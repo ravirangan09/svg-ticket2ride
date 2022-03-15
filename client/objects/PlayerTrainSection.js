@@ -15,34 +15,7 @@ export default class PlayerTrainSection {
     this.game = game
     this.location = 'playertrain';
     this.deck = []
-    // this.init()
     this.initEvents()
-  }
-
-  init() {
-    this.maskGraphics = this.scene.make.graphics()
-    this.maskRect = new Phaser.Geom.Rectangle(LEFT, TOP-10, SECTION_WIDTH, SECTION_HEIGHT+10);
-    this.maskGraphics.fillRectShape(this.maskRect)
-    this.mask = new Phaser.Display.Masks.GeometryMask(this.scene, this.maskGraphics)
-    this.container = this.scene.add.container(LEFT, TOP)
-    this.container.setMask(this.mask)
-    this.rightArrow = this.scene.add.triangle(LEFT+SECTION_WIDTH-10, TOP+SECTION_HEIGHT+10, 
-                                                    0, 0, 0, 20, 20, 10, 0x00FFFF)
-                        .setInteractive();
-
-    this.leftArrow = this.scene.add.triangle(LEFT+10, TOP+SECTION_HEIGHT+10, 
-                                                      0, 10, 20, 20, 20, 0, 0x00FFFF)
-                      .setInteractive();
-  }
-
-  scrollContainer(offset) {
-    const bounds = this.container.getBounds();
-    const min = bounds.width > SECTION_WIDTH ? LEFT+SECTION_WIDTH-bounds.width: LEFT 
-    const max = LEFT
-    this.container.x = PhaserMath.Clamp(this.container.x + offset, 
-                            min, max)
-    this.rightArrow.setVisible(this.container.x > min)
-    this.leftArrow.setVisible(this.container.x < max)
   }
 
   async setCards() {
@@ -83,12 +56,6 @@ export default class PlayerTrainSection {
   cleanup() {
     this.deck.forEach(c=>c.hasImage() && c.destroy())
     delete this.deck
-    // this.container.clearMask()
-    // this.container.destroy()
-    // this.maskGraphics.destroy()
-    // this.mask.destroy()
-    // this.leftArrow.destroy()
-    // this.rightArrow.destroy()
   }
 
   async moveCard(card) {
@@ -99,8 +66,6 @@ export default class PlayerTrainSection {
   }
 
   render() {
-    // this.container.removeAll()
-
     this.counter = {
       black: 0,
       white: 0,
@@ -128,9 +93,7 @@ export default class PlayerTrainSection {
       card.setLocation(this.location)
       prevColor = card.color
       this.counter[card.color]++;
-      // this.container.add(card.image)
     }
-    // this.scrollContainer(0)
   }
 
   initEvents() {
@@ -139,10 +102,6 @@ export default class PlayerTrainSection {
     const boardSection = game.boardSection;
 
     const isFullyVisible = (card)=>{
-      // const x = this.container.x + card.left
-      // const y = this.container.y + card.top
-      // const rect = new Phaser.Geom.Rectangle(x+0.01, y+0.01, card.width-0.02, card.height-0.02)
-      // return Phaser.Geom.Rectangle.ContainsRect(this.maskRect, rect)
       return true
     }
 
@@ -206,12 +165,12 @@ export default class PlayerTrainSection {
       const { routeIndex, index } = newContext.actionData;
 
       const coinColor = context.players[context.currentPlayerIndex].color;
-      boardSection.renderCoinWithAnimation(coinColor, routeIndex, index)
-      // if(context.myTurn) {
-      //   await scene.closeDeckSection.moveCard(context.selectedCard)
-      //   context.selectedCard = null;
-      //   input.setDefaultCursor("default")
-      // } 
+      await boardSection.renderCoinWithAnimation(coinColor, routeIndex, index)
+      if(context.myTurn) {
+        await game.closeDeckSection.moveCard(context.selectedCard)
+        context.selectedCard = null;
+        rootSVG.attr("cursor", "default")
+      } 
       // else {
       //   await scene.playersSection.moveCardToClose(context.currentPlayerIndex)
       // }

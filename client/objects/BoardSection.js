@@ -9,7 +9,7 @@ import mapBackground from "../assets/watercolor-europe-t2r.jpg"
 import * as SVGWrapper from './SVGWrapper';
 import { clamp } from '../helpers/game_helper';
 
-
+const pinObjects = {} 
 const dist = (x1, y1, x2, y2)=>Math.sqrt((x2-x1)**2 + (y2-y1)**2)
 const rad2deg = r=>r*180.0/Math.PI
 const deg2rad = d=>d*Math.PI/180.0
@@ -32,8 +32,7 @@ class BoardSection {
 
   async renderCoinWithAnimation(coinColor, routeIndex, index) {
     const coin = this.renderCoin(coinColor, routeIndex, index)
-    const { rotation, centerX, centerY } = coin.data()
-    await coin.animateScale(3, 1000, centerX, centerY, rotation)
+    await coin.animateScale(3, 1000)
   }
 
   renderCoin(coinColor, routeIndex, index) {
@@ -50,14 +49,15 @@ class BoardSection {
           .stroke("black")
           .attachTo(this.boardGroup)
           .rotate(rad2deg(segment.theta), x, y)
-          .data({
-            rotation: rad2deg(segment.theta),
-            centerX: x,
-            centerY: y
-          })
-
   }
   
+  async highlightLocation(place) {
+    const pin = pinObjects[place];
+    pin.bringToFront().fill("#0f0")
+    await pin.animateScale(3, 2000)
+    pin.fill("black")
+  }
+
   render() {
 
     const { rootSVG } = this.game
@@ -128,9 +128,11 @@ class BoardSection {
           .stroke("#000")
           .move(x,y)
           .attachTo(this.boardGroup)
-    new SVGWrapper.SVGCircle(pinBounds.width/2-4)
+    pinObjects[place] = new SVGWrapper.SVGCircle(pinBounds.width/2-4)
           .fill("#000")
+          .stroke("black")
           .move(x,y)
+          .scale(1, x, y) //needed for highlight-location transform-origin
           .attachTo(this.boardGroup)
   }
 

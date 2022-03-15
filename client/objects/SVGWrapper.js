@@ -43,6 +43,10 @@ class SVGElement {
     return this.attr("visibility", "visible")
   }
 
+  setVisible(isVisible) {
+    return isVisible ? this.visible() : this.hide();
+  }
+
   size(w, h) {
     return this.width(w).height(h);
   }
@@ -228,7 +232,6 @@ class SVGElement {
       }
     }`
 
-    console.log(keyFrameStyle)
     const keyFrameIndex = styleSheet.insertRule(keyFrameStyle, styleSheet.cssRules.length)
     const clName = 'cl-'+Math.random().toString(36).slice(2,7)
 
@@ -298,6 +301,11 @@ export class SVGGroup extends SVGElement {
   move(x, y) {
     return this.attr('transform', `translate(${x} ${y})`)
   }
+
+  children() {
+    return Array.from(this._node.childNodes);
+  }
+
 }
 
 export class SVGText extends SVGElement {

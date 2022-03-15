@@ -16,9 +16,8 @@ export default class CloseDeckSection {
   }
 
   async moveCard(card) {
-    const firstCard = this.deck[0]
-    const x = LEFT + firstCard.width/2
-    const y = TOP + firstCard.height/2
+    const x = LEFT
+    const y = TOP
     await card.moveTo(x, y, false)
   }
 
