@@ -35,7 +35,7 @@ export default class RouteTicket {
                                     .attachTo(group)
 
     const color = this.value < 20 ? "#a52a2a" : "#4682b4";
-    const sourceText = new SVGWrapper.SVGText(this.source+' \u2193')
+    new SVGWrapper.SVGText(this.source+' \u2193')
                                   .attr("dominant-baseline", "hanging")
                                   .attr("font-size", "15px")
                                   .fill(color)

@@ -30,6 +30,11 @@ class BoardSection {
     return this.routes[routeIndex]
   }
 
+  renderClaimedSegments() {
+    const context = this.game.context;
+    context.claimedSegments.forEach(s=>this.renderCoin(s.coinColor, s.routeIndex, s.index))
+  }
+
   async renderCoinWithAnimation(coinColor, routeIndex, index) {
     const coin = this.renderCoin(coinColor, routeIndex, index)
     await coin.animateScale(3, 1000)

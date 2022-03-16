@@ -8,6 +8,30 @@ export const asyncSleep = async (time) => {
   return await (new Promise(resolve => setTimeout(resolve, time)));
 }
 
+export const button = (parent, label, width, actionData) => {
+  const clickEvent = new CustomEvent('button-click', { detail: actionData })
+  const group = new SVGWrapper.SVGGroup()
+                      .addClass("game-button")
+                      .attachTo(parent)
+                      .addListener("click", ()=>document.dispatchEvent(clickEvent))
+                      
+  const buttonBox = new SVGWrapper.SVGRect(width,1)
+                .move(0,0)
+                .fill("#C0C0C0")
+                .cornerRadius(4)
+                .attachTo(group)
+
+  const textObject = new SVGWrapper.SVGText(label)
+                          .attr("dominant-baseline", "middle")
+                          .attr("font-size", "16px")
+                          .move(5, 5)
+                          .attachTo(group)
+  const bbox = textObject.bbox()
+  buttonBox.size(width, 10+bbox.height)
+  textObject.move((width-bbox.width)/2, 7 + bbox.height/2)
+  return group
+}
+
 export const toast = (game, msg) => {
   const { toastText, toastRect, gameConfig } = game
   toastRect.visible().bringToFront()

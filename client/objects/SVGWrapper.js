@@ -186,9 +186,11 @@ class SVGElement {
   }
 
   async animateMove(tx, ty, duration) {
-    const styleSheet = document.styleSheets[0]
+    const styleElement  = document.createElement("style")
+
     const keyFrameName = 'kf-'+Math.random().toString(36).slice(2,7)
-    const keyFrameStyle = `@keyframes ${keyFrameName} {
+    const clName = 'cl-'+Math.random().toString(36).slice(2,7)
+    const styleContent = `@keyframes ${keyFrameName} {
       from {
         x: ${this.x()}px;
         y: ${this.y()}px;
@@ -198,27 +200,28 @@ class SVGElement {
         x: ${tx}px;
         y: ${ty}px;
       }
-    }`
-    const keyFrameIndex = styleSheet.insertRule(keyFrameStyle, styleSheet.cssRules.length)
-    const clName = 'cl-'+Math.random().toString(36).slice(2,7)
-    const classStyle = `.${clName} {
+    }
+
+    .${clName} {
       animation-name: ${keyFrameName};
       animation-duration: ${duration}ms;
     }`
-    const classStyleIndex = styleSheet.insertRule(classStyle, styleSheet.cssRules.length)
+    styleElement.innerText = styleContent
+    document.head.appendChild(styleElement)
     this.addClass(clName)
     await asyncSleep(duration)
     this.removeClass(clName)
-    styleSheet.deleteRule(classStyleIndex)
-    styleSheet.deleteRule(keyFrameIndex)
+    styleElement.innerText = ''
+    styleElement.remove()
   }
 
   async animateScale(factor, duration) {
-    const styleSheet = document.styleSheets[0]
+    const styleElement  = document.createElement("style")
     const keyFrameName = 'kf-'+Math.random().toString(36).slice(2,7)
+    const clName = 'cl-'+Math.random().toString(36).slice(2,7)
     const currentTransform = this.transform()
 
-    const keyFrameStyle = `@keyframes ${keyFrameName} {
+    const styleContent = `@keyframes ${keyFrameName} {
       from {
         transform: ${currentTransform} scale(1);
       }
@@ -230,21 +233,19 @@ class SVGElement {
       to {
         transform: ${currentTransform} scale(1);
       }
-    }`
+    }
 
-    const keyFrameIndex = styleSheet.insertRule(keyFrameStyle, styleSheet.cssRules.length)
-    const clName = 'cl-'+Math.random().toString(36).slice(2,7)
-
-    const classStyle = `.${clName} {
+    .${clName} {
       animation-name: ${keyFrameName};
       animation-duration: ${duration}ms;
     }`
-    const classStyleIndex = styleSheet.insertRule(classStyle, styleSheet.cssRules.length)
+    styleElement.innerText = styleContent
+    document.head.appendChild(styleElement)
     this.addClass(clName)
     await asyncSleep(duration)
     this.removeClass(clName)
-    styleSheet.deleteRule(classStyleIndex)
-    styleSheet.deleteRule(keyFrameIndex)
+    styleElement.innerText = ''
+    styleElement.remove()
   }
 }
 
@@ -302,10 +303,6 @@ export class SVGGroup extends SVGElement {
     return this.attr('transform', `translate(${x} ${y})`)
   }
 
-  children() {
-    return Array.from(this._node.childNodes);
-  }
-
 }
 
 export class SVGText extends SVGElement {
@@ -356,6 +353,15 @@ export class SVGUse extends SVGElement {
     this._node = document.createElementNS(xmlns, "use")
     const refId = '#'+defElement.id(); 
     this.attr('href', refId)       
+  }
+
+}
+
+export class SVGPolygon extends SVGElement {
+  constructor(points) {
+    super()
+    this._node = document.createElementNS(xmlns, "polygon")
+    this.attr('points', points.map(p=>p.join(",")).join(" "))       
   }
 
 }

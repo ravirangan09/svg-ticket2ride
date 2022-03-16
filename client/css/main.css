@@ -16,3 +16,7 @@ body {
 }
 
 
+.game-button:hover {
+  outline: 4px solid #0f0; 
+  cursor: pointer;
+}

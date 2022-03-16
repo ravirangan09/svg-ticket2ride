@@ -5,9 +5,11 @@ import CloseDeckSection from './objects/CloseDeckSection';
 import OpenDeckSection from './objects/OpenDeckSection';
 import * as SVGWrapper from './objects/SVGWrapper';
 import { io } from 'socket.io-client';
-import { initToast } from './helpers/game_helper';
+import { initToast, toast } from './helpers/game_helper';
 import PlayerTrainSection from './objects/PlayerTrainSection';
 import PlayerRouteSection from './objects/PlayerRouteSection';
+import PlayersSection from './objects/PlayersSection';
+import { LoginSection } from './objects/LoginSection';
 
 const GAME_CONFIG = {
   width: 1920,
@@ -22,13 +24,14 @@ class Game {
     this.rootSVG = new SVGWrapper.SVGRoot()
                             .size('100%', '100%')
                             .viewBox(0, 0, gameConfig.width, gameConfig.height)
+                            .attr("preserveAspectRatio", "none")
                             .attachTo(gameConfig.parent)
     const defsObject = new SVGWrapper.SVGDefs().attachTo(this.rootSVG)
     this.rootSVG.data('defs', defsObject)
     this.boardRendered = false;
     this.gameConfig = gameConfig
     this.context = {}
-    this.initSocket()
+    this.initEvents()
     initToast(this)
   }
 
@@ -37,6 +40,7 @@ class Game {
   }
 
   render(context) {
+    document.title = `Ticket to Ride - ${context.me.name}`
     if(!this.boardRendered) 
       this.renderGameBoard()
     this.setContext(context)
@@ -51,6 +55,7 @@ class Game {
     this.openDeckSection = new OpenDeckSection(this)
     this.playerTrainSection = new PlayerTrainSection(this)
     this.playerRouteSection = new PlayerRouteSection(this)
+    this.playersSection = new PlayersSection(this)
   }
 
   setContext(context) {
@@ -63,37 +68,57 @@ class Game {
   }
 
   renderContext() {
+    this.playersSection.render()
     this.closeDeckSection.setCards();
     this.openDeckSection.setCards();
     this.playerTrainSection.setCards();
     this.playerRouteSection.setTickets();
     // this.routeDeckSection.setTickets();
-    // if(this.context.claimedSegments.length)
-    //   this.boardSection.renderClaimedSegments();
+    if(this.context.claimedSegments.length)
+      this.boardSection.renderClaimedSegments();
   }
 
-  doLogin() {
-    this.socket.emit("login", "Player 1", 1, res=> {
-      if(res.status != "ok") {
-        alert(res.reason)
-        window.location.reload();
-      }
-    })
-  }
-
-  initSocket() {
+  
+  initEvents() {
     const socket = io();
+
+    let loginSection = null;
+    const showLogin = ()=> {
+      loginSection = new LoginSection(this)
+      loginSection.render()  
+    }
+
+    const nextTurn = (newContext) => {
+      this.setContext(newContext)
+      const playerName = newContext.players[newContext.currentPlayerIndex].name;
+      // this.playersSection.showTurnIcon();
+      if(newContext.isGameOver) {
+        if(newContext.finalTurnCount == 0) {
+          this.showGameOver()
+        }
+        else {
+          toast(this, `Final round. ${playerName}'s turn to play`)
+        }
+      }
+      else {
+        toast(this, `${playerName}'s turn to play`)
+      }
+    }
+
     socket.on("connect", ()=>{ 
       this.socket = socket; 
-      setTimeout(()=>this.doLogin(), 500);
+      setTimeout(()=>showLogin(), 500);
     });
     socket.on("startgame", (context)=>{
+      loginSection.destroy();
       this.render(context)
     })
     socket.on("resumegame", (context)=>{
-      console.log("resume game")
+      loginSection.destroy();
       this.render(context)
     })
+    socket.on("next-turn", nextTurn)
+
   } //end initSocket
 } //end class Game
 
