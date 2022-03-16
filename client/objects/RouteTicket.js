@@ -35,7 +35,7 @@ export default class RouteTicket {
                                     .attachTo(group)
 
     const color = this.value < 20 ? "#a52a2a" : "#4682b4";
-    new SVGWrapper.SVGText(this.source+' \u2193')
+    const sourceText = new SVGWrapper.SVGText(this.source+' \u2193')
                                   .attr("dominant-baseline", "hanging")
                                   .attr("font-size", "15px")
                                   .fill(color)
@@ -49,6 +49,7 @@ export default class RouteTicket {
                                   .move(10, BOX_HEIGHT-10)
                                   .attachTo(group)
     
+    group.data({ sourceText, targetText })
     const bbox = targetText.bbox()
     targetText.x(BOX_WIDTH - 10 - bbox.width)
               .y(BOX_HEIGHT - 40 - bbox.height)
@@ -127,8 +128,8 @@ export default class RouteTicket {
   }
 
   setCompleted(isCompleted) {
-    this.openObject.children[2].fill(isCompleted ? "green" : "#a52a2a")
-    this.openObject.children[3].fill(isCompleted ? "green" : "#a52a2a")
+    this.openObject.data("sourceText").fill(isCompleted ? "green" : "#a52a2a")
+    this.openObject.data("targetText").fill(isCompleted ? "green" : "#a52a2a")
   }
 
   toJSON() {

@@ -41,7 +41,7 @@ export default class PlayerRouteSection {
       if(i < oldLength) {
         if(this.deck[i].isSame(ticket) && this.deck[i].hasImage()) {
           // this.deck[i].setDiscard(ticket.age == 'new')
-          // this.deck[i].setCompleted(ticket.isCompleted)
+          this.deck[i].setCompleted(ticket.isCompleted)
           continue; //same ticket, keep it
         }
         this.deck[i].destroy()  //diff color destroy
@@ -50,7 +50,7 @@ export default class PlayerRouteSection {
                                         ticket.score, true)
                             .setInteractive()
       // newTicket.setDiscard(ticket.age == 'new')
-      // newTicket.setCompleted(ticket.isCompleted)
+      newTicket.setCompleted(ticket.isCompleted)
       if(i < oldLength)
         this.deck[i] = newTicket;  //new card
       else
