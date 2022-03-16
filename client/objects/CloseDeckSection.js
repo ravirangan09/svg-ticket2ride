@@ -103,9 +103,9 @@ export default class CloseDeckSection {
         }
         await game.playerTrainSection.moveCard(topCard)
       }
-      // else {
-      //   await scene.playersSection.moveCard(topCard, context.currentPlayerIndex)
-      // }
+      else {
+        await game.playersSection.moveCard(topCard, context.currentPlayerIndex)
+      }
       game.setContext(newContext)
       inProgress = false;
     }

@@ -165,17 +165,17 @@ export default class PlayerTrainSection {
       const { routeIndex, index } = newContext.actionData;
 
       const coinColor = context.players[context.currentPlayerIndex].color;
-      await boardSection.renderCoinWithAnimation(coinColor, routeIndex, index)
+      boardSection.renderCoinWithAnimation(coinColor, routeIndex, index)
       if(context.myTurn) {
         await game.closeDeckSection.moveCard(context.selectedCard)
         context.selectedCard = null;
         rootSVG.attr("cursor", "default")
       } 
-      // else {
-      //   await scene.playersSection.moveCardToClose(context.currentPlayerIndex)
-      // }
+      else {
+        await game.playersSection.moveCardToClose(context.currentPlayerIndex)
+      }
       game.setContext(newContext)
-      // scene.playersSection.updateCurrentPlayerCoins();
+      game.playersSection.updateCurrentPlayerCoins();
       inProgress = false;
     }
 

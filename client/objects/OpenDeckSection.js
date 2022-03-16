@@ -96,9 +96,9 @@ export default class OpenDeckSection {
       if(context.myTurn) {
         await game.playerTrainSection.moveCard(card)
       }
-      // else {
-      //   await game.playersSection.moveCard(card, context.currentPlayerIndex)
-      // }
+      else {
+        await game.playersSection.moveCard(card, context.currentPlayerIndex)
+      }
       game.setContext(newContext)
       inProgress = false;
     }

@@ -134,10 +134,10 @@ export default class PlayersSection {
   } //end render
 
   async moveCardToClose(playerIndex) {
-    const closeDeckSection = this.scene.closeDeckSection;
+    const closeDeckSection = this.game.closeDeckSection;
     const card = closeDeckSection.popCard()
-    const x = LEFT + card.width/2
-    const y = TOP + (card.height+GUTTER)*playerIndex + card.height/2
+    const x = LEFT
+    const y = TOP + (card.height+GUTTER)*playerIndex
     card.setPosition(x, y, false);
     await closeDeckSection.moveCard(card)
   }
