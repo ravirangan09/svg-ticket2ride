@@ -53,11 +53,6 @@ export default class PlayerTrainSection {
     this.render()
   }
 
-  cleanup() {
-    this.deck.forEach(c=>c.hasImage() && c.destroy())
-    delete this.deck
-  }
-
   async moveCard(card) {
     const x = LEFT
     const y = TOP

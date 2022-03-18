@@ -45,11 +45,6 @@ export default class OpenDeckSection {
     this.render()
   }
 
-  cleanup() {
-    this.deck.forEach(c=>c.hasImage() && c.destroy())
-    delete this.deck
-  }
-
   render() {
     const firstCard = this.deck[0]
     const x = LEFT

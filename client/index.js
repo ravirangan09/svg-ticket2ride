@@ -10,6 +10,7 @@ import PlayerTrainSection from './objects/PlayerTrainSection';
 import PlayerRouteSection from './objects/PlayerRouteSection';
 import PlayersSection from './objects/PlayersSection';
 import { LoginSection } from './objects/LoginSection';
+import RouteDeckSection from './objects/RouteDeckSection';
 
 const GAME_CONFIG = {
   width: 1920,
@@ -56,6 +57,7 @@ class Game {
     this.playerTrainSection = new PlayerTrainSection(this)
     this.playerRouteSection = new PlayerRouteSection(this)
     this.playersSection = new PlayersSection(this)
+    this.routeDeckSection = new RouteDeckSection(this)
   }
 
   setContext(context) {
@@ -73,7 +75,7 @@ class Game {
     this.openDeckSection.setCards();
     this.playerTrainSection.setCards();
     this.playerRouteSection.setTickets();
-    // this.routeDeckSection.setTickets();
+    this.routeDeckSection.setTickets();
     if(this.context.claimedSegments.length)
       this.boardSection.renderClaimedSegments();
   }

@@ -15,7 +15,7 @@ export class LoginSection {
     const { rootSVG } = this.game;
     let y = TOP
 
-    this._status = new SVGWrapper.SVGText("Welcome to Ticket2Ride")
+    this._status = new SVGWrapper.SVGText("Welcome to Ticket to Ride")
                       .move(LEFT, y)
                       .attr("font-size", "24px")
                       .attr("dominant-baseline", "middle")

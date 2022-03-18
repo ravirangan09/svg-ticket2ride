@@ -21,11 +21,6 @@ export default class CloseDeckSection {
     await card.moveTo(x, y, false)
   }
 
-  cleanup() {
-    this.deck.forEach(c=>c.hasImage() && c.destroy())
-    delete this.deck
-  }
-
   setCards() {
     const cards = this.game.context.closeDeck;
     const oldLength = this.deck.length;

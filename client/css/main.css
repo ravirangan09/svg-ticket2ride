@@ -4,6 +4,7 @@
 body {
   background-color: black;
   font-family: 'Marko One';
+  overflow: hidden;
 }
 
 #game {
@@ -15,8 +16,15 @@ body {
   outline: 4px solid #0f0;
 }
 
+.discard-image:hover {
+  cursor: pointer
+}
 
 .game-button:hover {
   outline: 4px solid #0f0; 
+  cursor: pointer;
+}
+
+.scroll-arrow:hover {
   cursor: pointer;
 }

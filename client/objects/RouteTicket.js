@@ -2,6 +2,8 @@ const BOX_WIDTH = 150
 const BOX_HEIGHT = 100
 const BG_COLOR = "#F2E58F"
 const TWEEN_DURATION = 250
+import ticketClosed from "../assets/route-closed.svg";
+import ticketDiscard from "../assets/cancel.svg";
 import * as SVGWrapper from "./SVGWrapper";
 
 export default class RouteTicket {
@@ -22,7 +24,7 @@ export default class RouteTicket {
     const { rootSVG } = this.game;
 
     const group = new SVGWrapper.SVGGroup()
-                        .attachTo(rootSVG)
+                      .attachTo(rootSVG)
 
     new SVGWrapper.SVGRect(BOX_WIDTH, BOX_HEIGHT)
                                     .move(0, 0)
@@ -72,17 +74,26 @@ export default class RouteTicket {
     bgRect.size(10+valueBBox.width, valueBBox.height+5)
           .move(10, BOX_HEIGHT - valueBBox.height - 10)
 
-    // const discardImage = this.scene.add.image(BOX_WIDTH/2-20, BOX_HEIGHT/2-20, 'cancel')
-    //                         .setVisible(false)
-    //                         .setInteractive()
-    //                         .setData('discard', this)
-
+    const clickEvent = new CustomEvent('discard-click', { detail: this })
+    const discardObject = new SVGWrapper.SVGImage(ticketDiscard)
+                            .size(16, 16)
+                            .hide()
+                            .move(BOX_WIDTH-24, BOX_HEIGHT-24)
+                            .addClass("discard-image")
+                            .addListener("click", ()=>document.dispatchEvent(clickEvent))
+                            .attachTo(group)
+    group.data("discard", discardObject)
+    
     this.openObject = group
-    // this.closeObject = this.scene.add.image(0, 0, 'route-closed')
-    //                           .setDisplaySize(BOX_WIDTH, BOX_HEIGHT)
-    //                           .setVisible(false)
-    //                           .setData('ticket', this)
-    //                           .setInteractive()
+    this.closeObject = new SVGWrapper.SVGImage(ticketClosed)
+                            .setVisible(!this.open)
+                            .size(BOX_WIDTH, BOX_HEIGHT)
+                            .attachTo(rootSVG)
+  }
+
+  attachTo(parent) {
+    this.open ? this.openObject.attachTo(parent) : this.closeObject.attachTo(parent)
+    return this;
   }
 
   get width() {
@@ -124,7 +135,7 @@ export default class RouteTicket {
   }
 
   setDiscard(isVisible) {
-    this.openObject.children[5].setVisible(isVisible)
+    this.openObject.data("discard").setVisible(isVisible)
   }
 
   setCompleted(isCompleted) {
@@ -173,22 +184,22 @@ export default class RouteTicket {
   async setPosition(x, y, open=true) {
     this.show(open)
     this.openObject.move(x, y)
-    // this.closeObject.move(x, y)
+    this.closeObject.move(x, y)
   }
 
   hide() {
-    // this.closeObject.hide()
+    this.closeObject.hide()
     this.openObject.hide()
   }
 
   show(open) {
     if((open && !this.open) || (!open && this.open)) {
       if(open) {
-        this.openObject.visible().bringToFront()
-        // this.closeObject.hide()
+        this.openObject.bringToFront()
+        this.closeObject.hide()
       }
       else {
-        // this.closeObject.visible().bringToFront()
+        this.closeObject.visible().bringToFront()
         this.openObject.hide()
       }
     }
@@ -197,26 +208,7 @@ export default class RouteTicket {
 
   async moveTo(x, y, open) {
     this.show(open);
-    const o = open ? this.openObject : this.closeObject;
-    const no = open ? this.closeObject : this.openObject;
-    o.disableInteractive()
-    if(this.scene.gamePaused) {
-      //tweens will not work on browser minimize, as requestAnimationFrame is paused
-      return o.setPosition(x,y)
-    }
-
-    return new Promise(resolve=>this.scene.tweens.add({
-                              targets: o,
-                              duration: TWEEN_DURATION,
-                              x,
-                              y,
-                              onComplete: ()=>{
-                                o.setInteractive()
-                                no.setPosition(x, y)
-                                resolve(true)
-                              }
-                            })
-    );
+    return await this.image.animateMove(x, y, TWEEN_DURATION)
   }
 
 }

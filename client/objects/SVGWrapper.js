@@ -297,10 +297,27 @@ export class SVGGroup extends SVGElement {
   constructor() {
     super()
     this._node = document.createElementNS(xmlns, "g")
+    this._x = 0
+    this._y = 0
   }
 
   move(x, y) {
+    this._x = x
+    this._y = y
     return this.attr('transform', `translate(${x} ${y})`)
+  }
+
+  //group does not support x and y attribute, so need to manipulate differently
+  x(value) {
+    if(value === undefined) return this._x;
+    this._x = value
+    return this.attr('transform', `translate(${this._x} ${this._y})`)
+  }
+
+  y(value) {
+    if(value === undefined) return this._y;
+    this._y = value;
+    return this.attr('transform', `translate(${this._x} ${this._y})`)
   }
 
 }
