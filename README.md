@@ -1,5 +1,5 @@
 # Ticket to Ride Europe
-This is a local version of Ticket to Ride Europe. Works with 2-5 players. It uses socket.io for communication and runs of a local node serer. With ngrok or any tunneling tool, once can expose the http port to external users
+This is a local version of Ticket to Ride Europe. Works with 2-5 players. It uses socket.io for communication and runs of a local node serer. With ngrok or any tunnelling tool, one can expose the http port to external users
 
 ## Install 
 1. `yarn install` to install node packages
