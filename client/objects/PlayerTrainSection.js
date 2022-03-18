@@ -1,13 +1,14 @@
-import { toast } from "../helpers/game_helper"
+import { clamp, toast } from "../helpers/game_helper"
 import TrainCard from "./TrainCard"
-
+import * as SVGWrapper from "./SVGWrapper";
 
 const TOP = 940
 const LEFT = 20
 
-const SECTION_HEIGHT = 110
+const SECTION_HEIGHT = 115
 const SECTION_WIDTH = 920 
-const SCROLL_OFFSET = 50;
+const SCROLL_OFFSET = 30;
+const GUTTER = 5
 
 export default class PlayerTrainSection {
 
@@ -15,8 +16,54 @@ export default class PlayerTrainSection {
     this.game = game
     this.location = 'playertrain';
     this.deck = []
+    this.initScroll()
     this.initEvents()
   }
+
+  initScroll() {
+    const { rootSVG } = this.game
+    const defsObject = rootSVG.data('defs')
+    new SVGWrapper.SVGRectClipPath(SECTION_WIDTH, SECTION_HEIGHT, LEFT-GUTTER, TOP-GUTTER*2)
+                            .id("train-clip")
+                            .attachTo(defsObject) 
+                            .attr("clipPathUnits", "userSpaceOnUse")
+
+    const parentGroup = new SVGWrapper.SVGGroup()
+                            .attachTo(rootSVG)
+                            .attr("clip-path", "url(#train-clip)")
+
+    this.trainGroup = new SVGWrapper.SVGGroup()
+                            .attachTo(parentGroup)
+
+                            
+    let x = LEFT + SECTION_WIDTH - 25
+    let y = TOP + SECTION_HEIGHT  
+    this.rightArrow = new SVGWrapper.SVGPolygon([[x,y], [x, y+20], [x+20,y+10]])
+                            .fill("#0ff")
+                            .addClass("scroll-arrow")
+                            .hide()
+                            .attachTo(rootSVG)
+                            .addListener("click", ()=>this.scrollContainer(-SCROLL_OFFSET))
+
+    x = LEFT
+    y = TOP + SECTION_HEIGHT  
+  
+    this.leftArrow = new SVGWrapper.SVGPolygon([[x,y+10], [x+20, y], [x+20,y+20]])
+                            .fill("#0ff")
+                            .addClass("scroll-arrow")
+                            .hide()
+                            .attachTo(rootSVG)
+                            .addListener("click", ()=>this.scrollContainer(SCROLL_OFFSET))
+  }
+
+  scrollContainer(offset) {
+    const bbox = this.trainGroup.bbox();
+    const min = bbox.width > SECTION_WIDTH ? SECTION_WIDTH-(bbox.width+2*GUTTER): 0 
+    const max = 0
+    this.trainGroup.x(clamp(this.trainGroup.x() + offset, min, max))
+    this.rightArrow.setVisible(this.trainGroup.x() > min)
+    this.leftArrow.setVisible(this.trainGroup.x() < max)
+  }  
 
   async setCards() {
     const cards = this.game.context.me.cards;
@@ -43,6 +90,7 @@ export default class PlayerTrainSection {
         this.deck[i].destroy()  //diff color destroy
       }
       const card = new TrainCard(this.game, color, true)
+                        .attachTo(this.trainGroup)
                         .setInteractive()
       if(i < oldLength)
         this.deck[i] = card;  //new card
@@ -89,6 +137,7 @@ export default class PlayerTrainSection {
       prevColor = card.color
       this.counter[card.color]++;
     }
+    this.scrollContainer(0)
   }
 
   initEvents() {
@@ -137,7 +186,7 @@ export default class PlayerTrainSection {
     const performCardAction = (card) => {
       const cardImage = card.image
       cardImage.bringToFront()
-      cardImage.incY(-10)
+      cardImage.incY(-8)
       context.actionName = 'claim-route'
       context.actionCount++;
       rootSVG.attr("cursor", "crosshair")
@@ -146,7 +195,7 @@ export default class PlayerTrainSection {
 
     const undoCardAction = () => {
       const card = context.selectedCard;
-      card.image.incY(10)
+      card.image.incY(8)
       context.actionCount--;
       context.actionName = context.actionCount > 0 ? "claim-route" : "start";
       context.selectedCard = null;
@@ -246,17 +295,6 @@ export default class PlayerTrainSection {
           undoCardAction();
         }
       }
-      // const [routeIndex=-1, index] = gameObject.getData(['routeIndex', 'index'])
-      // if(canDoAction() && routeIndex >= 0 && context.selectedCard && 
-      //     canClaimRoute(routeIndex, index)) {
-      //   sendAction(routeIndex, index, context.selectedCard.color)
-      // }
-      // if(gameObject == this.rightArrow) {
-      //   this.scrollContainer(-SCROLL_OFFSET);
-      // }
-      // if(gameObject == this.leftArrow) {
-      //   this.scrollContainer(SCROLL_OFFSET);
-      // }
     }
  
     const segmentClick = async (e)=>{

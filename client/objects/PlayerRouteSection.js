@@ -97,7 +97,6 @@ export default class PlayerRouteSection {
 
   scrollContainer(offset) {
     const bbox = this.ticketGroup.bbox();
-    console.log(bbox)
     const min = bbox.width > SECTION_WIDTH ? SECTION_WIDTH-(bbox.width+2*GUTTER): 0 
     const max = 0
     this.ticketGroup.x(clamp(this.ticketGroup.x() + offset, min, max))

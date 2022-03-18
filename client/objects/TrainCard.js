@@ -60,6 +60,11 @@ export default class TrainCard {
                   .move(0,0)
   }
 
+  attachTo(parent) {
+    this.image.attachTo(parent)
+    return this;
+  }
+
   setLocation(location) {
     this.location = location;
   }
