@@ -37,7 +37,7 @@ export default class PlayersSection {
                           .attr("dominant-baseline", "hanging")
                           .move(15, 10)
                           .fill(color) 
-                          .attr("font-size", "16px")
+                          .attr("font-size", "14px")
                           .attachTo(group)
 
     new SVGWrapper.SVGRect(16, 16)
@@ -140,6 +140,7 @@ export default class PlayersSection {
     const y = TOP + (card.height+GUTTER)*playerIndex
     card.setPosition(x, y, false);
     await closeDeckSection.moveCard(card)
+    card.destroy() 
   }
 
   initEvents() {
