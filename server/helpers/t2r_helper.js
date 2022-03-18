@@ -143,7 +143,7 @@ const getPlayersContext = (includeClaimedSegments=false) => {
   return playersContext;
 }
 
-const TURN_TIMEOUT = 3000
+const TURN_TIMEOUT = 2000
 
 const doNextTurn = () => {
   setTimeout(()=>{

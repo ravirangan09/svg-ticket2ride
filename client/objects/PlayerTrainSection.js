@@ -145,7 +145,7 @@ export default class PlayerTrainSection {
     const { socket, context, rootSVG } = game;
     const boardSection = game.boardSection;
 
-    const isFullyVisible = (card)=>{
+    const isFullyVisible = ()=>{
       return true
     }
 

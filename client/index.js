@@ -5,7 +5,7 @@ import CloseDeckSection from './objects/CloseDeckSection';
 import OpenDeckSection from './objects/OpenDeckSection';
 import * as SVGWrapper from './objects/SVGWrapper';
 import { io } from 'socket.io-client';
-import { initToast, toast } from './helpers/game_helper';
+import { dialog, initToast, toast } from './helpers/game_helper';
 import PlayerTrainSection from './objects/PlayerTrainSection';
 import PlayerRouteSection from './objects/PlayerRouteSection';
 import PlayersSection from './objects/PlayersSection';
@@ -80,6 +80,20 @@ class Game {
       this.boardSection.renderClaimedSegments();
   }
 
+  showGameOver() {
+    this.socket.emit("scores", (scores)=>{
+      let strArray = ["Game Over!"]
+      for(const { name, score} of scores) {
+        strArray.push(`${name}: ${score}`)
+      }
+      dialog(this.rootSVG, strArray, 300, { color: "white", 
+                                                                bgColor: "green",
+                                                                fontSize: 32
+                                                                })
+        .move(this.gameConfig.width/2-150, this.gameConfig.height/2)
+                                                              
+    });
+  }
   
   initEvents() {
     const socket = io();
@@ -93,7 +107,7 @@ class Game {
     const nextTurn = (newContext) => {
       this.setContext(newContext)
       const playerName = newContext.players[newContext.currentPlayerIndex].name;
-      // this.playersSection.showTurnIcon();
+      this.playersSection.showTurnIcon();
       if(newContext.isGameOver) {
         if(newContext.finalTurnCount == 0) {
           this.showGameOver()

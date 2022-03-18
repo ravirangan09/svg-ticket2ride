@@ -8,6 +8,33 @@ export const asyncSleep = async (time) => {
   return await (new Promise(resolve => setTimeout(resolve, time)));
 }
 
+export const dialog = (parent, strArray, width, { bgColor, color, fontSize }) => {
+  const group = new SVGWrapper.SVGGroup()
+                      .addClass("game-button")
+                      .attachTo(parent)
+                      
+  const buttonBox = new SVGWrapper.SVGRect(width, 1)
+                .move(0,0)
+                .fill(bgColor)
+                .attachTo(group)
+
+  let y = 30
+  for(let str of strArray) {
+    const textObject = new SVGWrapper.SVGText(str)
+                          .attr("dominant-baseline", "middle")
+                          .attr("font-size", `${fontSize}px`)
+                          .fill(color)
+                          .move(5, 5)
+                          .attachTo(group)
+    const bbox = textObject.bbox()
+    textObject.move((width-bbox.width)/2, y)
+    y += (7 + bbox.height)
+  }
+  const bbox = group.bbox()
+  buttonBox.size(width, 10+bbox.height)
+  return group
+}
+
 export const button = (parent, label, width, actionData) => {
   const clickEvent = new CustomEvent('button-click', { detail: actionData })
   const group = new SVGWrapper.SVGGroup()

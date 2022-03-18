@@ -12,7 +12,6 @@ import { clamp } from '../helpers/game_helper';
 const pinObjects = {} 
 const dist = (x1, y1, x2, y2)=>Math.sqrt((x2-x1)**2 + (y2-y1)**2)
 const rad2deg = r=>r*180.0/Math.PI
-const deg2rad = d=>d*Math.PI/180.0
 
 const COLOR_MAP = { black: '#3A535D', gray: '#A8A8A8', white: '#E5E6EA', 
                     green: '#86C247', purple: '#BD7394', orange: '#E5913A',

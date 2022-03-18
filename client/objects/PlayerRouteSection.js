@@ -126,7 +126,7 @@ export default class PlayerRouteSection {
     const game = this.game
     const { context, socket } = game;
 
-    const isFullyVisible = (ticket)=>{
+    const isFullyVisible = ()=>{
       return true;
     }
 

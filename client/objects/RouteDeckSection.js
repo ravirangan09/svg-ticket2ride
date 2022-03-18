@@ -21,7 +21,6 @@ export default class RouteDeckSection  {
   }
     
   setTickets() {
-    const { rootSVG } = this.game
     const tickets = this.game.context.shortTicketDeck;
     const oldLength = this.deck.length;
     const newLength = tickets.length;
@@ -103,10 +102,10 @@ export default class RouteDeckSection  {
     }
 
     const hasEnoughRoutes = () => {
-      // if(context.me.coins > 35) {
-      //   toast(game, "Not enough routes claimed to add tickets. You may have clicked it by mistake!")
-      //   return false;
-      // }
+      if(context.me.coins > 35) {
+        toast(game, "Not enough routes claimed to add tickets. You may have clicked it by mistake!")
+        return false;
+      }
       return true;
     } 
 
