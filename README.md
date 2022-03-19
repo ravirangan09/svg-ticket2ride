@@ -18,7 +18,7 @@ Users then connect to http://ip-address:4000, where ip-address is the IP address
 * Main board can be zoomed/reset on pressing the `Z` key. Use arrow keys in zoom state to move board around 
 * Ticket completion is shwon in green (all routes connecting the source and destination) are claimed by you. 
 * Comprehensive error checking to ensure players do not accidently place trains on invalid route segments 
-* Each player's current score on clicking the `My Score` button
+* Each player's current score on clicking the `My Score` button. Scores are calculated automatically and displayed at the end
 * On game completion, final scores are calculated and score table is displayed
 * Users can minimize board (at the risk of missing out the action) and resume
 * Users can disconnect and connect back again and state is preserved as long as server is running
@@ -37,6 +37,7 @@ Users then connect to http://ip-address:4000, where ip-address is the IP address
 * Train stations, tunnels and ferries feature not implemented yet. Simpler game play treating all gray routes the same
 * Save game state to disk across server restarts
 * Change Player names and player count 
+* Longest route (additional 10 points) 
 
 ## Game Play
 One of the three game play options
