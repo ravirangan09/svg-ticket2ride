@@ -82,6 +82,7 @@ class Game {
 
   showGameOver() {
     this.socket.emit("scores", (scores)=>{
+      scores.sort((a,b)=>b.score-a.score)
       let strArray = ["Game Over!"]
       for(const { name, score} of scores) {
         strArray.push(`${name}: ${score}`)

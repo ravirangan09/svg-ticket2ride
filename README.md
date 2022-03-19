@@ -30,7 +30,7 @@ Users then connect to http://ip-address:4000, where ip-address is the IP address
 ## Tech stack
 * Javascript and nodejs on backend
 * esbuild bundler for frontend bundling
-* Frontend vanilla javascript using SVG elements and CSS animations. An earlier verion used the popular Phaser game engine, but ended up rewriting to make it lighter and faster, with vanilla javascript and svg. No React, no Vue, no Angular. Just plain SVG elements and vanilla javascript and ES6 imports bunled using esbuild bundler. 
+* Frontend vanilla javascript using SVG elements and CSS animations. An earlier verion used the popular Phaser game engine, but ended up rewriting to make it lighter and faster, with vanilla javascript and svg. No React, no Vue, no Angular. Just plain SVG elements and vanilla javascript and ES6 imports bundled using esbuild. 
 
 ## Pending features
 * Undo not supported yet
@@ -43,10 +43,10 @@ Users then connect to http://ip-address:4000, where ip-address is the IP address
 One of the three game play options
 1. Draw train cards - click on one of the five open train cards on rights or the blue closed train cards on top right corner. On every turn players can pick two (some rules apply for multi-color locomote cards). On picking two cards, the game automatically moves to the next player
 2. Claim route - click on a specific train card you own (at bottom left portion of screen). It will pop out. The cursor changes to a `+` to click on a route segment. If you accidently clicked on a train card, click on it again to revert and choose another card or draw a train card. Once you select a route segment, it checks if you have sufficient matching train cards (including locomotive cards) to complete the route. Complete the route. Only on route completion, the game moves to next player
-3. Draw tickets - After a player has claimed a few routes (atleast 10 train coins are used; each player gets a total of 45 coins as shown on the left for each player), the player can click the yellow ticket deck on the right below the open train deck. Three tickets are added to your ticket deck. Users can discard at most two of the tickets by clicking on the cancel button on the crd. Discarding can be done any time during any player's turn and is not counted as a valid turn. WARNING: If you three more tickets, the previous three cannot be discarded (as per the rules). 
-*IMPORTANT*: As undo is not supported, clicking on it will add tickets to your ticket deck (on the bottom right), which when unclainmed at the end, will reduce your score. However clicking on it during the initial part of game is prevented, to prevent accidental clicks. 
+3. Draw tickets - After a player has claimed a few routes (atleast 10 train coins are used; each player gets a total of 45 coins as shown on the left for each player), the player can click the yellow ticket deck on the right below the open train deck. Three tickets are added to your ticket deck (shown on the bottom right). A scroll button is shown to view the additional tickets beyong your screen. Users can discard at most two of the tickets by clicking on the cancel button on the crd. Discarding can be done any time during any player's turn and is not counted as a valid turn. WARNING: If you click and add three more tickets, the previous three cannot be discarded (as per the rules). 
+*IMPORTANT*: As undo is not supported, clicking on it will add tickets to your ticket deck, which when unclainmed at the end, will reduce your score. However clicking on it during the initial part of game is prevented, to prevent accidental clicks. 
 
-Finally the left side is the player dashboard. It shows the order of player turns. Every new game, the players are sorted randomly and coin colors are randomly picked. At the start, each player gets 45 coins. The game gets to the final round when one of the players gets to two coins. 
+Finally, the left side is the player dashboard. It shows the order of player turns. Every new game, the players are sorted randomly and coin colors are randomly picked. At the start, each player gets 45 coins. The game gets to the final round when one of the players gets to two coins. 
 
 ## Notes
-This is a fully functional version, as I continue to play this version with my family. Feel free to fork and use it. If you like this version, star it. The `server` and `client` code are pretty simple. Do take a look. If you find any issues, feel free to raise bug. 
+This is a fully functional version, and I continue to play this version with my family. Feel free to fork and use it. If you like this version, star it. The `server` and `client` code are pretty simple. Do take a look. If you find any issues, feel free to raise bug. 
