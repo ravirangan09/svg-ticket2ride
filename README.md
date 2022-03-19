@@ -11,11 +11,17 @@ Users then connect to http://ip-address:4000, where ip-address is the IP address
 **Tip**: To change names of players or number of players, update the `client/data/userlist.json` and rebuild `yarn build` and restart server `yarn server`.
 
 ## Features
+* Scalable to any screen size
+* Turn based game with indicator of current player
+* Scrollable ticket and train card areas for large number of cards or tickets
+* Click on any ticket at any point in the game and it will highlight the source and destination places for easy identification of routes
+* Main board can be zoomed/reset on pressing the `Z` key. Use arrow keys in zoom state to move board around 
+* Comprehensive error checking to ensure players do not accidently place trains on invalid route segments 
+* Each player's current score on clicking the `My Score` button
+* On game completion, final scores are calculated and score table is displayed
 * Users can disconnect and connect back again and state is preserved as long as server is running
 * Same rules and game play as official Ticket to Ride. See [Rules](./Rules.pdf). However, the first version has a simpler game play for gray routes. See Pending Features below.
-* Scalable to any screen size
-* Scrollable ticket and train card areas for large number of cards
-* Main board can be zoomed/reset on pressing the `Z` key. Use arrow keys in zoom state to move board around  
+
 
 ![Screenshot](./images/screenshot.jpg "Screenshot")
 
@@ -32,6 +38,6 @@ Users then connect to http://ip-address:4000, where ip-address is the IP address
 
 ## Usage Notes
 This is a fully functional version, as I continue to play this version with my family
- 
+
 
 
