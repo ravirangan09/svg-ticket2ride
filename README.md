@@ -19,6 +19,7 @@ Users then connect to http://ip-address:4000, where ip-address is the IP address
 * Comprehensive error checking to ensure players do not accidently place trains on invalid route segments 
 * Each player's current score on clicking the `My Score` button
 * On game completion, final scores are calculated and score table is displayed
+* Users can minimize board (at the risk of missing out the action) and resume
 * Users can disconnect and connect back again and state is preserved as long as server is running
 * Same rules and game play as official Ticket to Ride. See [Rules](./Rules.pdf). However, the first version has a simpler game play for gray routes. See Pending Features below.
 
