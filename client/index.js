@@ -16,7 +16,7 @@ const GAME_CONFIG = {
   width: 1920,
   height: 1080,
   parent: '#game',
-  publicPath: '/'   //terminate wuth slash
+  publicPath: '/'   //terminate with slash
 }
 
 class Game {
