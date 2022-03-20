@@ -107,7 +107,7 @@ export default class PlayersSection {
     const { context, rootSVG } = this.game;
     const  x = LEFT;
     let y = this.scoreButton.data("y")+60;
-    const {name, score} = scores.find(s=>s.name == context.me.name)
+    const {name, score } = scores.find(s=>s.name == context.me.name)
     const textObject = new SVGWrapper.SVGText(`${name}: ${score}`)
                           .attr("font-size", "16px")
                           .attr("dominant-baseline", "middle")

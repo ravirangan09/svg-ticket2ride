@@ -83,14 +83,14 @@ class Game {
     this.socket.emit("scores", (scores)=>{
       scores.sort((a,b)=>b.score-a.score)
       let strArray = ["Game Over!"]
-      for(const { name, score} of scores) {
-        strArray.push(`${name}: ${score}`)
+      for(const { name, score, longestPathScore } of scores) {
+        strArray.push(`${name}: ${score} LP Score: ${longestPathScore}`)
       }
-      dialog(this.rootSVG, strArray, 300, { color: "white", 
+      dialog(this.rootSVG, strArray, 600, { color: "white", 
                                                                 bgColor: "green",
                                                                 fontSize: 32
                                                                 })
-        .move(this.gameConfig.width/2-150, this.gameConfig.height/2)
+        .move(this.gameConfig.width/2-300, this.gameConfig.height/2)
                                                               
     });
   }

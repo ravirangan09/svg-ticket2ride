@@ -69,6 +69,7 @@ const calculateLongestRouteForPlayer = (playerIndex)=>{
     }
     pathScores.push(...getPathScores(allPaths))
   }
+  if(pathScores.length == 0) return 0;
   pathScores.sort((a,b)=>b[1]-a[1])
   //dump score
   const [maxPath, score ] = pathScores[0]
