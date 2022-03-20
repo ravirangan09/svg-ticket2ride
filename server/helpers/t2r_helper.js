@@ -250,7 +250,7 @@ const doClaimRoute = ({ routeLength, routeIndex, index, selectedCardColor, route
                                     })
   if((APP_CONTEXT.actionCount/2) >= routeLength) {
     updateRouteCompletion(APP_CONTEXT.currentPlayerIndex)
-    //shuffle closeDeckdeck
+    //shuffle closeDeck
     shuffle(APP_CONTEXT.closeDeck)
     doNextTurn();
   }
@@ -303,7 +303,7 @@ const doAction = (actionName, actionData) => {
 
 const getScores = () => {
   calculateScores();
-  return APP_CONTEXT.gamePlayers.map(p=>pick(p, ['name', 'score']))
+  return APP_CONTEXT.gamePlayers.map(p=>pick(p, ['name', 'score', 'longestPathScore']))
 }
 
 module.exports = {

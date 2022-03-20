@@ -1,11 +1,88 @@
 const SEGMENT_SCORES = { 1:1, 2:2, 3:4, 4:7, 6:15, 8:21 };
 const routes = require('../../client/data/routes.json')
 
-const getNeighbours = (claimSegments) => {
+const getNeighbourRoutes = (claimedRoutes) => {
   const neighbours = {}
-  for(const r of claimSegments) {
-    const { routeIndex, index } = r;
-    const { source, target } = routes[routeIndex][index];
+  for(const ri of claimedRoutes) {
+    neighbours[ri] = []
+    const { source, target } = routes[ri][0];
+    for(const nri of claimedRoutes) {
+      if(nri == ri) continue
+      const { source: nsource, target: ntarget } = routes[nri][0]
+      if(source == nsource || source == ntarget || target == nsource || target == ntarget) {
+        neighbours[ri].push(nri)
+      }
+    }
+  }
+  return neighbours;
+}
+
+const getAllPaths = (pathArr, neighbourRoutes) => {
+  const allPaths = []
+  let isChanged = false;
+  for(const path of pathArr) {
+    const ri = path.at(-1) 
+    let isPathChanged = false;
+    for(const nri of neighbourRoutes[ri]) {
+      if(path.includes(nri)) continue; //prev route 
+      if(path.length >= 2) {
+        //find end point
+        const { source:s2, target: t2 } = routes[path.at(-1)][0]
+        const { source:s1, target: t1 } = routes[path.at(-2)][0]
+        const dest = (s2 == s1 || s2 == t1 ) ? t2 : s2
+        const { source: ns, target: nt } = routes[nri][0]
+        if(dest != ns && dest != nt) continue;
+      }
+      const newArr = [ ...path, nri]
+      isPathChanged = true;
+      allPaths.push(newArr)
+    }
+    if(!isPathChanged)
+      allPaths.push(path)
+    else 
+      isChanged = true;
+  }
+  return [allPaths, isChanged];
+}
+
+const getPathScores = (allPaths)=> {
+  const result = []
+  for(const path of allPaths) {
+    const score = path.reduce((a,r)=>a+routes[r].length, 0)
+    result.push([path, score])
+  }
+  return result;
+}
+
+const calculateLongestRouteForPlayer = (playerIndex)=>{
+  const claimedRouteIndexes = getRouteIndexesForPlayer(playerIndex)
+  // const claimedRouteIndexes = claimedSegments.map(s=>s.routeIndex)
+  //                               .filter((v,i,a)=>a.indexOf(v) == i)
+  const neighbourRoutes = getNeighbourRoutes(claimedRouteIndexes)
+  let pathScores = []
+  for(const r in neighbourRoutes) {
+    let allPaths = [[ parseInt(r) ]]
+    let isChanged = false;
+    for(let i=0;i<100;i++) {
+      [allPaths, isChanged ] = getAllPaths(allPaths, neighbourRoutes)
+      if(!isChanged) break;
+    }
+    pathScores.push(...getPathScores(allPaths))
+  }
+  pathScores.sort((a,b)=>b[1]-a[1])
+  //dump score
+  const [maxPath, score ] = pathScores[0]
+  console.log("Score: ", score)
+  for(let ri of maxPath) {
+    console.log(routes[ri][0].source, routes[ri][0].target)
+  }
+  return score
+}
+
+const getNeighbours = (claimedRouteIndexes) => {
+  const neighbours = {}
+  for(const ri of claimedRouteIndexes) {
+    const { source, target } = routes[ri][0];
     if(!neighbours.hasOwnProperty(source)) {
       neighbours[source] = [];
     }
@@ -18,28 +95,29 @@ const getNeighbours = (claimSegments) => {
   return neighbours;
 }
 
-const getRoutesForPlayer = (playerIndex) => {
+const getRouteIndexesForPlayer = (playerIndex) => {
   return APP_CONTEXT.claimedSegments
           .filter(s=>s.playerIndex == playerIndex)
-          .filter((s,i,a)=>a.findIndex(ts=>ts.routeIndex == s.routeIndex) == i)
+          .map(s=>s.routeIndex)
+          .filter((v,i,a)=>a.indexOf(v) == i)
 }
 
 const calculateSegmentScoresForPlayer = (playerIndex) => {
-  const claimedRoutes = getRoutesForPlayer(playerIndex)
+  const claimedRouteIndexes = getRouteIndexesForPlayer(playerIndex)
 
-  return claimedRoutes.reduce((a,s)=>a+SEGMENT_SCORES[routes[s.routeIndex].length], 0)
+  return claimedRouteIndexes.reduce((a,ri)=>a+SEGMENT_SCORES[routes[ri].length], 0)
 } 
 
 const calculateTicketScoresForPlayer = (playerIndex) => {
-  const claimedRoutes = getRoutesForPlayer(playerIndex)
-  const neighbours = getNeighbours(claimedRoutes)
+  const claimedRouteIndexes = getRouteIndexesForPlayer(playerIndex)
+  const neighbours = getNeighbours(claimedRouteIndexes)
   const tickets = APP_CONTEXT.gamePlayers[playerIndex].tickets;
   return tickets.reduce((a,t)=>isConnected(t, neighbours) ? (a+t.score): (a-t.score), 0)
 }
 
 const updateRouteCompletion = (playerIndex) => {
-  const claimedRoutes = getRoutesForPlayer(playerIndex)
-  const neighbours = getNeighbours(claimedRoutes)
+  const claimedRouteIndexes = getRouteIndexesForPlayer(playerIndex)
+  const neighbours = getNeighbours(claimedRouteIndexes)
   const tickets = APP_CONTEXT.gamePlayers[playerIndex].tickets;
   tickets.forEach(t=>t.isCompleted = isConnected(t, neighbours))
 }
@@ -49,6 +127,7 @@ const calculateScores = ()=>{
     const p = APP_CONTEXT.gamePlayers[index];
     p.score = calculateSegmentScoresForPlayer(index)+
                   calculateTicketScoresForPlayer(index);
+    p.longestPathScore = calculateLongestRouteForPlayer(index)
   }
 }
 
@@ -74,5 +153,6 @@ const isConnected = (ticket, neighbours) => {
 
 module.exports = {
   calculateScores,
-  updateRouteCompletion
+  updateRouteCompletion,
+  calculateLongestRouteForPlayer
 }

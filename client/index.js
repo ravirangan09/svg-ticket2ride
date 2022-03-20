@@ -21,7 +21,6 @@ const GAME_CONFIG = {
 
 class Game {
   constructor(gameConfig) {
-    // this.render()
     this.rootSVG = new SVGWrapper.SVGRoot()
                             .size('100%', '100%')
                             .viewBox(0, 0, gameConfig.width, gameConfig.height)

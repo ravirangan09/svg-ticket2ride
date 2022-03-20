@@ -31,6 +31,7 @@ class BoardSection {
 
   renderClaimedSegments() {
     const context = this.game.context;
+    console.log(context.claimedSegments)
     context.claimedSegments.forEach(s=>this.renderCoin(s.coinColor, s.routeIndex, s.index))
   }
 
